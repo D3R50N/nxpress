@@ -150,7 +150,7 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
       defaultLocale: i18nConfig ? i18nConfig.defaultLocale : "en",
     };
 
-    res.locals.tailwindCssUrl = tailwindCssUrl;
+    res.locals._tailwindCssUrl = tailwindCssUrl;
     res.locals.tailwind = `<link rel="stylesheet" href="${tailwindCssUrl}"/>`;
     res.locals.year = now.getFullYear();
     res.locals.now = now;

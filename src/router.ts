@@ -615,7 +615,12 @@ export async function renderPageView(
     res.locals.R.params = req.params || {};
   }
 
-  const tailwindCssUrl = res.locals.tailwindCssUrl || "/tailwind.css";
+  const tailwindCssUrl =
+    res.locals._tailwindCssUrl ||
+    res.locals.tailwindCssUrl ||
+    "/tailwind.css";
+  delete res.locals._tailwindCssUrl;
+  delete res.locals.tailwindCssUrl;
 
   const mergedProps = { ...options.globals, ...res.locals, ...pageProps };
   const systemReservedKeys = [

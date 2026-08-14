@@ -161,6 +161,7 @@ async function testExecuteMw() {
   assert.strictEqual(detPrefixSub.locale, 'en');
   assert.strictEqual(detPrefixSub.isPrefixed, true);
   assert.strictEqual(detPrefixSub.pathname, '/products');
+
 }
 
 testExecuteMw().then(() => {

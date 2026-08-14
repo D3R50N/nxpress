@@ -17,6 +17,7 @@ export {
   translate,
   detectLocale,
 } from "./i18n";
+export { exportStatic, NxpressExportOptions, ExportResult } from "./export";
 
 
 

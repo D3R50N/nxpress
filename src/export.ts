@@ -339,13 +339,11 @@ export async function exportStatic(
         const systemLocals: Record<string, any> = {
           year: now.getFullYear(),
           now,
-          tailwindCssUrl,
           tailwind: `<link rel="stylesheet" href="${tailwindCssUrl}"/>`,
           E: getFilteredEnv(options.secureEnv ?? fileConfig.secureEnv ?? true),
           env: getFilteredEnv(options.secureEnv ?? fileConfig.secureEnv ?? true),
           ...builtinHelpers,
           tr,
-          localeUrl,
           lang: targetLocale || i18nConfig?.defaultLocale || "en",
         };
 
@@ -354,7 +352,6 @@ export async function exportStatic(
             renderComponent(name, props, systemLocals),
           ...builtinHelpers,
           tr,
-          localeUrl,
           ...(options.globals || fileConfig.globals || {}),
         };
 

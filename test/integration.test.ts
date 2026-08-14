@@ -29,6 +29,35 @@ function fetchUrl(port: number, urlPath: string): Promise<{ status: number; body
   });
 }
 
+function postRequest(
+  port: number,
+  urlPath: string,
+  data: string,
+  headers: Record<string, string> = {},
+): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      `http://localhost:${port}${urlPath}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(data),
+          ...headers,
+        },
+      },
+      (res) => {
+        let body = '';
+        res.on('data', (chunk) => (body += chunk));
+        res.on('end', () => resolve({ status: res.statusCode || 500, body }));
+      },
+    );
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
 async function runTests() {
   try {
     console.log('Running TS integration tests...');

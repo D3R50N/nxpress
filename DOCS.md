@@ -205,7 +205,6 @@ Function used inside templates to include reusable components from `componentsDi
 
 - `year`: Current 4-digit year (`2026`).
 - `now`: Current JavaScript `Date` object instance.
-- `tailwindCssUrl`: Path to the compiled Tailwind stylesheet (default `"/tailwind.css"`).
 - `tailwind`: Ready-to-render HTML `<link>` tag string: `<link rel="stylesheet" href="/tailwind.css"/>`.
 
 ---
@@ -248,9 +247,9 @@ Nxpress registers built-in helper functions accessible in all supported template
 <%- I('sun', 'w-5 h-5 hidden dark:block') %>
 ```
 
-### SEO and Metadata Helpers (`meta` / `seo`)
+### SEO and Metadata Helper (`meta`)
 
-- `meta([metadata])` / `seo([metadata])`: Generates `<title>`, `<meta name="description">`, `<link rel="canonical">`, OpenGraph, and Twitter tags from an `NxpressMetadata` object or template variables.
+- `meta([metadata])`: Generates `<title>`, `<meta name="description">`, `<link rel="canonical">`, OpenGraph, and Twitter tags from an `NxpressMetadata` object or template variables.
 
 ```html
 <!-- Rendering dynamic SEO tags in EJS head -->
@@ -264,7 +263,6 @@ Nxpress registers built-in helper functions accessible in all supported template
 
 - `cn(...classes)`: Merges class names and resolves Tailwind CSS class conflicts using `clsx` and `tailwind-merge` (e.g. `<%= cn('px-2 py-1', isActive && 'bg-blue-500', 'px-4') %>` -> `'py-1 bg-blue-500 px-4'`).
 - `tr(key, [params])`: Returns translated text dictionary string with variable interpolation.
-- `localeUrl(path, [targetLocale])`: Generates the localized URL for internal links and language switchers (SSR & SSG).
 - `len(val)`: Returns length of array, string, or object keys count.
 - `contains(arr, val)` / `includes(arr, val)`: Checks if array or string contains value.
 - `add(a, b)`: Adds two numbers.
@@ -587,23 +585,16 @@ Store translation dictionaries as JSON or TS/JS files in the `locales/` folder:
 }
 ```
 
-### 2. Translation & URL Helpers (`tr`, `localeUrl`)
+### 2. Translation Helper (`tr`)
 
 - `tr(key, [params])`: Returns translated text with variable replacements (falls back to `defaultLocale` then raw key).
-- `localeUrl(path, [targetLocale])`: Generates the localized URL:
-  - For internal links (e.g. `localeUrl('/products')`): returns `/products` (default locale) or `/fr/products` (active locale).
-  - For language switchers (e.g. `localeUrl(R.path, 'en')`): returns `/?lang=en` (default locale with cookie persistence) or `/fr` (prefixed path).
-  - Works identically in dynamic SSR and static export SSG!
 
 ```html
 <!-- In EJS / Handlebars / Nunjucks / Liquid -->
 <nav>
-  <!-- Internal link matching current language -->
-  <a href="<%= localeUrl('/products') %>"><%= tr('products_title') %></a>
-
-  <!-- Switch language seamlessly for SSR and SSG -->
-  <a href="<%= localeUrl(R.path, 'en') %>">English</a>
-  <a href="<%= localeUrl(R.path, 'fr') %>">Français</a>
+  <a href="/products"><%= tr('products_title') %></a>
+  <a href="?lang=en">English</a>
+  <a href="?lang=fr">Français</a>
 </nav>
 
 <h1><%= tr('welcome', { name: 'Alex' }) %></h1>
@@ -638,6 +629,7 @@ When running `nxpress export`, Nxpress compiles every page for each configured l
   - `out/fr/products/index.html`
 
 Each static HTML file is pre-rendered with the corresponding translated strings (`tr()`), so multi-language websites work out of the box on static hosts (Vercel, Netlify, GitHub Pages, S3/CloudFront) without requiring a Node.js server.
+
 
 
 

@@ -157,24 +157,10 @@ export const builtinHelpers = {
   },
 
   /**
-   * Alias for meta SEO helper.
-   */
-  seo(metaObj?: any): string {
-    return renderMetaTags(metaObj);
-  },
-
-  /**
    * Translation helper fallback.
    */
   tr(key: string, params: Record<string, any> = {}): string {
     return key;
-  },
-
-  /**
-   * Localized URL helper.
-   */
-  localeUrl(targetPath: string = '/', _targetLocale?: string): string {
-    return targetPath;
   },
 
   /**
