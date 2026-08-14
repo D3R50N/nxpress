@@ -97,4 +97,32 @@ program
     serve(options);
   });
 
+import { exportStatic } from "../export";
+
+program
+  .command("export")
+  .description("Export the application to static HTML and assets (SSG)")
+  .option("-o, --out-dir <dir>", "Output directory (default: out)")
+  .option("-e, --engine <engine>", "Template engine (hbs, ejs, html, nunjucks, liquid)")
+  .option("-a, --app-dir <dir>", "Custom app directory")
+  .option("-c, --components-dir <dir>", "Custom components directory")
+  .option("--public-dir <dir>", "Custom public directory")
+  .option("-r, --root-dir <dir>", "Custom root directory")
+  .option("--no-tailwind", "Disable Tailwind CSS compilation")
+  .action(async (cmdOptions) => {
+    const rootDir = cmdOptions.rootDir
+      ? path.resolve(cmdOptions.rootDir)
+      : process.cwd();
+    await exportStatic({
+      rootDir,
+      outDir: cmdOptions.outDir,
+      engine: cmdOptions.engine,
+      appDir: cmdOptions.appDir,
+      componentsDir: cmdOptions.componentsDir,
+      publicDir: cmdOptions.publicDir,
+      tailwind: cmdOptions.tailwind,
+    });
+  });
+
 program.parse(process.argv);
+

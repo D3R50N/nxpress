@@ -1,5 +1,6 @@
 import assert from 'assert';
 import path from 'path';
+import fs from 'fs';
 import { fileToRoutePath, findLayoutsForRoute, getRouteMiddlewares } from '../src/router';
 import { builtinHelpers } from '../src/helpers';
 import { renderComponent, registerComponents } from '../src/components';
@@ -13,6 +14,10 @@ assert.strictEqual(fileToRoutePath('users/index.hbs'), '/users');
 assert.strictEqual(fileToRoutePath('users/[id].hbs'), '/users/:id');
 assert.strictEqual(fileToRoutePath('blog/[...slug].hbs'), '/blog/*slug');
 assert.strictEqual(fileToRoutePath('api/health.ts'), '/api/health');
+assert.strictEqual(fileToRoutePath('(auth)/login.ejs'), '/login');
+assert.strictEqual(fileToRoutePath('(auth)/register/index.ejs'), '/register');
+assert.strictEqual(fileToRoutePath('admin/(dashboard)/analytics/[id].ejs'), '/admin/analytics/:id');
+assert.strictEqual(fileToRoutePath('(marketing)/(public)/about.njk'), '/about');
 
 console.log('Testing findLayoutsForRoute...');
 const exampleEjsDir = path.resolve('./example/ejs/app');
@@ -34,6 +39,15 @@ assert.strictEqual(builtinHelpers.add(5, 3), 8);
 assert.strictEqual(builtinHelpers.ternary(true, 'yes', 'no'), 'yes');
 assert.strictEqual(builtinHelpers.eq(5, 5), true);
 assert.strictEqual(builtinHelpers.ne(5, 10), true);
+const metaHtml = builtinHelpers.meta({
+  title: 'My Title',
+  description: 'My Description',
+  openGraph: { title: 'OG Title', image: '/og.png' }
+});
+assert.ok(metaHtml.includes('<title>My Title</title>'));
+assert.ok(metaHtml.includes('content="My Description"'));
+assert.ok(metaHtml.includes('property="og:title" content="OG Title"'));
+assert.ok(metaHtml.includes('property="og:image" content="/og.png"'));
 
 console.log('Testing case-insensitive renderComponent...');
 const exampleComponentsDir = path.resolve('./example/ejs/components');
@@ -91,8 +105,66 @@ async function testExecuteMw() {
   const { getJitiLoader } = await import('../src/router');
   const loader = getJitiLoader(path.resolve('.'));
   assert.ok(loader);
+
+  // 5. Test exportStatic (SSG)
+  const { exportStatic } = await import('../src/export');
+  const outDir = path.resolve('./example/ejs/out');
+  const exportRes = await exportStatic({
+    rootDir: path.resolve('./example/ejs'),
+    outDir,
+    tailwind: false,
+    clean: true,
+  });
+  assert.ok(exportRes.exportedFiles.length > 0);
+  assert.ok(fs.existsSync(path.join(outDir, 'index.html')));
+  // 6. Test i18n translation & detection
+  const { translate, detectLocale } = await import('../src/i18n');
+  const translations = {
+    fr: { welcome: 'Bienvenue {{name}} !', auth: { login: 'Connexion' } },
+    en: { welcome: 'Welcome {{name}}!', auth: { login: 'Log in' } },
+  };
+  const tFr = translate(translations, 'fr', 'fr', 'welcome', { name: 'Alice' });
+  assert.strictEqual(tFr, 'Bienvenue Alice !');
+  const tEnNested = translate(translations, 'en', 'fr', 'auth.login');
+  assert.strictEqual(tEnNested, 'Log in');
+  const tFallback = translate(translations, 'en', 'fr', 'missing.key');
+  assert.strictEqual(tFallback, 'missing.key');
+
+  assert.strictEqual(builtinHelpers.tr('test.key'), 'test.key');
+
+  const detQuery = detectLocale({ query: { lang: 'en' }, path: '/about', headers: {}, cookies: {} } as any, {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+  });
+  assert.strictEqual(detQuery.locale, 'en');
+
+  // Test cookie detection without query param
+  const detCookie = detectLocale({ path: '/about', headers: { cookie: 'lang=en; other=123' }, cookies: {} } as any, {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+  });
+  assert.strictEqual(detCookie.locale, 'en');
+
+  // Test URL path prefix taking priority over cookie
+  const detPrefix = detectLocale({ path: '/en', headers: { cookie: 'lang=fr' }, cookies: {} } as any, {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+  });
+  assert.strictEqual(detPrefix.locale, 'en');
+  assert.strictEqual(detPrefix.isPrefixed, true);
+  assert.strictEqual(detPrefix.pathname, '/');
+
+  const detPrefixSub = detectLocale({ path: '/en/products', headers: { cookie: 'lang=fr' }, cookies: {} } as any, {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+  });
+  assert.strictEqual(detPrefixSub.locale, 'en');
+  assert.strictEqual(detPrefixSub.isPrefixed, true);
+  assert.strictEqual(detPrefixSub.pathname, '/products');
 }
 
 testExecuteMw().then(() => {
-  console.log('✅ All TS router path and helper tests passed!');
+  console.log('✅ All TS router path, export, i18n and helper tests passed!');
 });
+
+

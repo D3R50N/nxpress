@@ -34,9 +34,16 @@ const etaEngine = new Eta({
 const liquidEngine = new Liquid();
 
 registerLiquidFilters(liquidEngine);
+const templateCache = new Map<
+  string,
+  { mtime: number; render: (props: Record<string, any>) => string }
+>();
+
 try {
   registerNunjucksHelpers(nunjucks);
-} catch (_e) {}
+} catch (_e) {
+  // Nunjucks helpers registration skipped if not supported
+}
 
 export function getJitiLoader(rootDir?: string): ReturnType<typeof createJiti> {
   const baseDir = rootDir || process.cwd();
@@ -72,28 +79,43 @@ export interface RouterOptions {
 
 /**
  * Renders a single template file with given props for EJS (Eta), Nunjucks, Liquid, HBS, HTML.
+ * Includes in-memory template caching in production mode.
  */
 export function renderTemplateFile(
   filePath: string,
   props: Record<string, any>,
 ): string {
+  const dev = isDevMode();
+  if (!dev) {
+    const cached = templateCache.get(filePath);
+    if (cached) {
+      return cached.render(props);
+    }
+  }
+
   const content = fs.readFileSync(filePath, "utf8");
   const ext = path.extname(filePath).toLowerCase();
+
+  let renderFn: (props: Record<string, any>) => string;
+
   if (ext === ".ejs") {
-    return etaEngine.renderString(ejsToEta(content), props);
+    const converted = ejsToEta(content);
+    renderFn = (p) => etaEngine.renderString(converted, p);
+  } else if (ext === ".njk" || ext === ".nunjucks") {
+    renderFn = (p) => nunjucks.renderString(content, p);
+  } else if (ext === ".liquid") {
+    renderFn = (p) => liquidEngine.parseAndRenderSync(content, p);
+  } else {
+    // Handlebars default
+    const compiled = hbs.handlebars.compile(content);
+    renderFn = (p) => compiled(p);
   }
 
-  if (ext === ".njk" || ext === ".nunjucks") {
-    return nunjucks.renderString(content, props);
+  if (!dev) {
+    templateCache.set(filePath, { mtime: Date.now(), render: renderFn });
   }
 
-  if (ext === ".liquid") {
-    return liquidEngine.parseAndRenderSync(content, props);
-  }
-
-  // Handlebars default
-  const template = hbs.handlebars.compile(content);
-  return template(props);
+  return renderFn(props);
 }
 
 /**
@@ -164,6 +186,13 @@ export function fileToRoutePath(relPath: string): string {
     /\.(hbs|ejs|html|eta|liquid|nunjucks|njk|pug|mustache|js|ts)$/i,
     "",
   );
+
+  // Filter out route group folders like (auth), (marketing), (dashboard)
+  const segments = routePath.split(/[/\\]/).filter((seg) => {
+    const trimmed = seg.trim();
+    return !(trimmed.startsWith("(") && trimmed.endsWith(")"));
+  });
+  routePath = segments.join("/");
 
   if (routePath === "index" || routePath.endsWith("/index")) {
     routePath = routePath.replace(/\/index$/, "").replace(/^index$/, "");
@@ -546,6 +575,34 @@ export async function renderPageView(
       if (propsFn) {
         const result = await propsFn(req, res);
         pageProps = { ...pageProps, ...result };
+      }
+
+      // Handle metadata export (object or function)
+      let metaFn: any = null;
+      if (typeof dataModule.metadata === "function") {
+        metaFn = dataModule.metadata;
+      } else if (
+        dataModule.default &&
+        typeof dataModule.default.metadata === "function"
+      ) {
+        metaFn = dataModule.default.metadata;
+      } else if (dataModule.metadata && typeof dataModule.metadata === "object") {
+        pageProps.metadata = { ...(pageProps.metadata || {}), ...dataModule.metadata };
+      } else if (
+        dataModule.default?.metadata &&
+        typeof dataModule.default.metadata === "object"
+      ) {
+        pageProps.metadata = {
+          ...(pageProps.metadata || {}),
+          ...dataModule.default.metadata,
+        };
+      }
+
+      if (metaFn) {
+        const metaRes = await metaFn(req, res);
+        if (metaRes && typeof metaRes === "object") {
+          pageProps.metadata = { ...(pageProps.metadata || {}), ...metaRes };
+        }
       }
     } catch (err) {
       logger.error(`Error executing companion file for ${templateFile}:`, err);

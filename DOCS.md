@@ -12,9 +12,10 @@ This document details all features, configuration options, template objects, hel
 
 You can start your Nxpress application in two ways:
 
-1. **Via Nxpress CLI (`nxpress dev` / `nxp dev`)**:
+1. **Via Nxpress CLI (`nxpress dev` / `nxp dev` / `nxpress export`)**:
    - `nxpress dev`: Starts the development server with Hot Reload, live route re-scanning, and Tailwind compilation.
    - `nxpress start`: Starts the production server.
+   - `nxpress export`: Generates a static HTML export (SSG) of all routes and assets to `out/`.
 
 2. **Via custom `server.ts` file (`npx tsx --watch server.ts` / `pnpm serve`)**:
    - Executes `server.ts` directly using `tsx`, instantiating the app via `nxpress(options)` / `serve(options)`.
@@ -39,6 +40,7 @@ Server options can be configured via `nxpress.config.json` (or `.js`, `.ts`, `.m
 | `globals` | `object` | `{}` | Application-wide default global variables automatically injected into all template views. |
 | `secureEnv` | `boolean` | `true` | Security flag filtering environment variables exposed to templates via `E` / `env`. |
 | `isDev` | `boolean` | Auto-detected | Development mode flag enabling Hot Reload and live route re-scanning. |
+| `i18n` | `object` | `undefined` | Internationalization options (`locales`, `defaultLocale`, `prefixDefault`, `localesDir`). |
 
 ### Configuration Example (`nxpress.config.json`)
 
@@ -51,6 +53,11 @@ Server options can be configured via `nxpress.config.json` (or `.js`, `.ts`, `.m
   "componentsDir": "components",
   "publicDir": "public",
   "secureEnv": true,
+  "i18n": {
+    "locales": ["fr", "en", "es"],
+    "defaultLocale": "fr",
+    "prefixDefault": false
+  },
   "globals": {
     "siteName": "My Store",
     "author": "Nxpress Team",
@@ -77,6 +84,7 @@ The directory structure inside `app/` defines the application routes.
 - Single Parameter (`app/products/[id].ejs`): Matches `/products/:id`. Accessible in companion via `req.params.id` and in views via `R.params.id`.
 - Catch-All Wildcard Slug (`app/docs/[...slug].ejs`): Matches `/docs/*`. Accessible in companion via `req.params.slug` or `req.params[0]` and in views via `R.params.slug` or `R.params[0]`.
 - Index Route (`app/index.ejs`): Matches `/`.
+- Route Groups (`app/(auth)/login.ejs`): Parenthesized folders organize routes and nested layouts without affecting URL pathnames (e.g. `app/(auth)/login.ejs` -> `/login`, `app/(dashboard)/settings.ejs` -> `/settings`).
 
 ### Reserved Filenames
 
@@ -88,7 +96,7 @@ The directory structure inside `app/` defines the application routes.
 
 ## 4. Page Companion Files (`app/**/*.ts`)
 
-Every view template page can be paired with a TypeScript/JavaScript companion file to fetch data before rendering.
+Every view template page can be paired with a TypeScript/JavaScript companion file to fetch data and define metadata before rendering.
 
 ### Props Export
 
@@ -110,6 +118,40 @@ export default async function props(req: Request, res: Response) {
 ```
 
 Backward Compatibility: Named export `export async function props(req, res)` is also supported.
+
+### Metadata and SEO Export (`metadata`)
+
+Companion files can export page-level metadata (as an object or an async function):
+
+```ts
+import type { NxpressMetadata, Request, Response } from '@nxpress/core';
+
+export const metadata: NxpressMetadata = {
+  title: 'Store Products - Nxpress',
+  description: 'Explore our wide selection of electronics.',
+  keywords: ['shop', 'store', 'electronics'],
+  openGraph: {
+    title: 'Store Products',
+    description: 'Explore our wide selection of electronics.',
+    image: '/og-image.png'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@nxpress'
+  }
+};
+```
+
+Dynamic metadata function is also supported:
+
+```ts
+export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
+  return {
+    title: `Product #${req.params.id} - Nxpress`,
+    description: 'Dynamic product details page.'
+  };
+}
+```
 
 ---
 
@@ -206,9 +248,23 @@ Nxpress registers built-in helper functions accessible in all supported template
 <%- I('sun', 'w-5 h-5 hidden dark:block') %>
 ```
 
+### SEO and Metadata Helpers (`meta` / `seo`)
+
+- `meta([metadata])` / `seo([metadata])`: Generates `<title>`, `<meta name="description">`, `<link rel="canonical">`, OpenGraph, and Twitter tags from an `NxpressMetadata` object or template variables.
+
+```html
+<!-- Rendering dynamic SEO tags in EJS head -->
+<head>
+  <%- meta(metadata) %>
+  <%- tailwind %>
+</head>
+```
+
 ### Collections and Utility Helpers
 
 - `cn(...classes)`: Merges class names and resolves Tailwind CSS class conflicts using `clsx` and `tailwind-merge` (e.g. `<%= cn('px-2 py-1', isActive && 'bg-blue-500', 'px-4') %>` -> `'py-1 bg-blue-500 px-4'`).
+- `tr(key, [params])`: Returns translated text dictionary string with variable interpolation.
+- `localeUrl(path, [targetLocale])`: Generates the localized URL for internal links and language switchers (SSR & SSG).
 - `len(val)`: Returns length of array, string, or object keys count.
 - `contains(arr, val)` / `includes(arr, val)`: Checks if array or string contains value.
 - `add(a, b)`: Adds two numbers.
@@ -386,6 +442,7 @@ import {
   NxpressServerOptions,
   TemplateEngine,
   HttpMethod,
+  NxpressMetadata,
   logger,
   Request,
   Response,
@@ -396,6 +453,7 @@ import {
 } from '@nxpress/core';
 ```
 
+- `NxpressMetadata`: Type definition for page SEO and social metadata objects.
 - `TemplateEngine`: Type alias for supported view engine identifiers (`"hbs" | "handlebars" | "ejs" | "html" | "njk" | "nunjucks" | "liquid"`).
 - `HttpMethod`: Supported HTTP request methods (`"get" | "post" | "put" | "patch" | "delete" | "options" | "head" | "all"`).
 - `Handler` / `RequestHandler`: Standard Express handler and middleware type re-exported from Express.
@@ -431,3 +489,157 @@ The client-side API is accessible anywhere in the browser DOM:
   🌓 Toggle Dark Mode
 </button>
 ```
+
+---
+
+## 14. Static Site Generation (SSG)
+
+Nxpress allows you to pre-render your entire application into static HTML files and copy assets for zero-Node.js hosting (e.g. GitHub Pages, Netlify, Vercel Static, S3).
+
+### CLI Command (`nxpress export`)
+
+```bash
+nxpress export
+# or with custom options
+nxpress export --out-dir dist/static --engine ejs
+```
+
+| Flag | Description | Default |
+| :--- | :--- | :--- |
+| `-o, --out-dir <dir>` | Destination output directory | `out` |
+| `-e, --engine <engine>` | Template engine to use | From config or `ejs` |
+| `-a, --app-dir <dir>` | Custom app/pages directory | From config |
+| `-c, --components-dir <dir>` | Custom components directory | From config |
+| `--public-dir <dir>` | Custom public static directory | `public` |
+| `--no-tailwind` | Disable automatic Tailwind CSS build | `false` |
+
+### Dynamic Routes with `generateStaticParams`
+
+For dynamic routes (e.g. `app/products/[id].ejs`), export `generateStaticParams()` in the companion file (`app/products/[id].ts`):
+
+```ts
+import type { Request, Response } from '@nxpress/core';
+
+// 1. Generate static route parameters at build time
+export async function generateStaticParams() {
+  const products = await fetchProducts();
+  return products.map((p) => ({ id: String(p.id) }));
+}
+
+// 2. Fetch page props for each param instance
+export default async function props(req: Request, res: Response) {
+  const product = await getProductById(req.params.id);
+  return { product };
+}
+```
+
+Nxpress will generate:
+- `out/products/1/index.html`
+- `out/products/2/index.html`
+- etc.
+
+> **Note**: Dynamic routes without `generateStaticParams()` are skipped during export.
+
+### Catch-All Routes (`[...slug]`)
+
+```ts
+export async function generateStaticParams() {
+  return [
+    { slug: 'getting-started' },
+    { slug: 'installation/manual' }
+  ];
+}
+```
+
+Generates:
+- `out/docs/getting-started/index.html`
+- `out/docs/installation/manual/index.html`
+
+---
+
+## 15. Internationalization (i18n)
+
+Nxpress includes built-in multi-language routing, automatic locale detection (URL prefix, cookies, `Accept-Language`), and translation helpers.
+
+### 1. Translation Files (`locales/`)
+
+Store translation dictionaries as JSON or TS/JS files in the `locales/` folder:
+
+```json
+// locales/fr.json
+{
+  "welcome": "Bienvenue {{name}} !",
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos"
+  }
+}
+```
+
+```json
+// locales/en.json
+{
+  "welcome": "Welcome {{name}}!",
+  "nav": {
+    "home": "Home",
+    "about": "About"
+  }
+}
+```
+
+### 2. Translation & URL Helpers (`tr`, `localeUrl`)
+
+- `tr(key, [params])`: Returns translated text with variable replacements (falls back to `defaultLocale` then raw key).
+- `localeUrl(path, [targetLocale])`: Generates the localized URL:
+  - For internal links (e.g. `localeUrl('/products')`): returns `/products` (default locale) or `/fr/products` (active locale).
+  - For language switchers (e.g. `localeUrl(R.path, 'en')`): returns `/?lang=en` (default locale with cookie persistence) or `/fr` (prefixed path).
+  - Works identically in dynamic SSR and static export SSG!
+
+```html
+<!-- In EJS / Handlebars / Nunjucks / Liquid -->
+<nav>
+  <!-- Internal link matching current language -->
+  <a href="<%= localeUrl('/products') %>"><%= tr('products_title') %></a>
+
+  <!-- Switch language seamlessly for SSR and SSG -->
+  <a href="<%= localeUrl(R.path, 'en') %>">English</a>
+  <a href="<%= localeUrl(R.path, 'fr') %>">Français</a>
+</nav>
+
+<h1><%= tr('welcome', { name: 'Alex' }) %></h1>
+```
+
+### 3. Template & Request Injections (`lang`, `R.locale`)
+
+- `lang`: Direct current language code in templates (e.g. `<html lang="<%= lang %>">`).
+- `R.locale`: Currently active locale string (e.g. `'en'`).
+- `R.locales`: Array of all available locales (e.g. `['en', 'fr']`).
+- `R.defaultLocale`: Configured default locale.
+
+### 4. Language Resolution Priority
+
+In SSR (Express), the language is determined in the following strict order:
+
+1. **URL Path Prefix** (`/fr/...`) -> Highest priority.
+2. **Query Parameter** (`?lang=fr` or `?locale=fr`) -> Automatically sets `Set-Cookie: lang=fr`.
+3. **Cookie** (`lang=fr`, `locale=fr`) -> Persisted user preference.
+4. **Accept-Language Header** (`Accept-Language: fr-FR`) -> Browser default.
+5. **Configured `defaultLocale`** -> Fallback.
+
+### 5. Static Site Generation (SSG) with i18n
+
+When running `nxpress export`, Nxpress compiles every page for each configured locale:
+
+- **Default locale** (`en`):
+  - `out/index.html`
+  - `out/products/index.html`
+- **Additional locales** (`fr`, `es`, ...):
+  - `out/fr/index.html`
+  - `out/fr/products/index.html`
+
+Each static HTML file is pre-rendered with the corresponding translated strings (`tr()`), so multi-language websites work out of the box on static hosts (Vercel, Netlify, GitHub Pages, S3/CloudFront) without requiring a Node.js server.
+
+
+
+
+

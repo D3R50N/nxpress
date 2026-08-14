@@ -21,6 +21,7 @@ import {
   LIVE_RELOAD_SCRIPT,
 } from "./liveReload";
 import { getFilteredEnv, isDevMode } from "./env";
+import { I18nConfig, createI18nMiddleware } from "./i18n";
 
 export type TemplateEngine = "ejs" | "hbs" | "html" | "nunjucks" | "liquid";
 
@@ -36,6 +37,7 @@ export interface NxpressServerOptions {
   globals?: Record<string, any>;
   isDev?: boolean;
   secureEnv?: boolean;
+  i18n?: I18nConfig;
 }
 
 /**
@@ -44,6 +46,7 @@ export interface NxpressServerOptions {
 export function nxpress(options: NxpressServerOptions = {}): Express {
   const app = express();
   const rootDir = options.rootDir || process.cwd();
+  const fileConfig = loadConfigFile(rootDir);
 
   // Load .env file from rootDir if available
   const envPath = path.join(rootDir, ".env");
@@ -107,6 +110,12 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // i18n localization middleware
+  const i18nConfig = options.i18n || fileConfig.i18n;
+  if (i18nConfig && Array.isArray(i18nConfig.locales) && i18nConfig.locales.length > 0) {
+    app.use(createI18nMiddleware(rootDir, i18nConfig));
+  }
+
   // Middleware injecting automatic global template variables
   app.use((req, res, next) => {
     const now = new Date();
@@ -123,7 +132,7 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
       ? `${protocol}://${host}${req.originalUrl || req.url}`
       : req.originalUrl || req.url;
 
-    const requestObj = {
+    const requestObj: Record<string, any> = {
       url: req.originalUrl || req.url,
       path: req.path,
       full,
@@ -136,6 +145,9 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
       ip: req.ip,
       protocol,
       host,
+      locale: res.locals.lang || (i18nConfig ? i18nConfig.defaultLocale : "en"),
+      locales: i18nConfig ? i18nConfig.locales : [],
+      defaultLocale: i18nConfig ? i18nConfig.defaultLocale : "en",
     };
 
     res.locals.tailwindCssUrl = tailwindCssUrl;
@@ -151,7 +163,11 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
     res.locals.req = requestObj;
     res.locals.$ = (name: string, props: Record<string, any> = {}) =>
       renderComponent(name, props, res.locals);
-    Object.assign(res.locals, builtinHelpers);
+    for (const [k, v] of Object.entries(builtinHelpers)) {
+      if (res.locals[k] === undefined) {
+        res.locals[k] = v;
+      }
+    }
 
     next();
   });

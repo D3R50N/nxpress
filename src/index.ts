@@ -10,3 +10,13 @@ export {
 } from "express";
 export { TemplateEngine } from "./server";
 export { HttpMethod } from "./router";
+export { NxpressMetadata } from "./helpers";
+export {
+  I18nConfig,
+  loadTranslations,
+  translate,
+  detectLocale,
+} from "./i18n";
+
+
+

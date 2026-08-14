@@ -66,12 +66,115 @@ function renderLucideIcon(
   return `<svg ${attrString}>${childrenHtml}</svg>`;
 }
 
+export interface NxpressMetadata {
+  title?: string;
+  description?: string;
+  keywords?: string | string[];
+  canonical?: string;
+  robots?: string;
+  openGraph?: {
+    title?: string;
+    description?: string;
+    url?: string;
+    type?: string;
+    image?: string;
+    siteName?: string;
+  };
+  twitter?: {
+    card?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+    creator?: string;
+  };
+  [key: string]: any;
+}
+
+/**
+ * Renders HTML meta tags for SEO from a metadata object.
+ */
+export function renderMetaTags(metaObj?: NxpressMetadata): string {
+  if (!metaObj || typeof metaObj !== 'object') return '';
+
+  const tags: string[] = [];
+
+  if (metaObj.title) {
+    tags.push(`<title>${String(metaObj.title).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>`);
+  }
+
+  if (metaObj.description) {
+    tags.push(`<meta name="description" content="${String(metaObj.description).replace(/"/g, '&quot;')}">`);
+  }
+
+  if (metaObj.keywords) {
+    const kw = Array.isArray(metaObj.keywords) ? metaObj.keywords.join(', ') : metaObj.keywords;
+    tags.push(`<meta name="keywords" content="${String(kw).replace(/"/g, '&quot;')}">`);
+  }
+
+  if (metaObj.canonical) {
+    tags.push(`<link rel="canonical" href="${String(metaObj.canonical).replace(/"/g, '&quot;')}">`);
+  }
+
+  if (metaObj.robots) {
+    tags.push(`<meta name="robots" content="${String(metaObj.robots).replace(/"/g, '&quot;')}">`);
+  }
+
+  if (metaObj.openGraph && typeof metaObj.openGraph === 'object') {
+    const og = metaObj.openGraph;
+    if (og.title || metaObj.title) tags.push(`<meta property="og:title" content="${String(og.title || metaObj.title).replace(/"/g, '&quot;')}">`);
+    if (og.description || metaObj.description) tags.push(`<meta property="og:description" content="${String(og.description || metaObj.description).replace(/"/g, '&quot;')}">`);
+    if (og.url) tags.push(`<meta property="og:url" content="${String(og.url).replace(/"/g, '&quot;')}">`);
+    if (og.type) tags.push(`<meta property="og:type" content="${String(og.type || 'website').replace(/"/g, '&quot;')}">`);
+    if (og.image) tags.push(`<meta property="og:image" content="${String(og.image).replace(/"/g, '&quot;')}">`);
+    if (og.siteName) tags.push(`<meta property="og:site_name" content="${String(og.siteName).replace(/"/g, '&quot;')}">`);
+  }
+
+  if (metaObj.twitter && typeof metaObj.twitter === 'object') {
+    const tw = metaObj.twitter;
+    if (tw.card) tags.push(`<meta name="twitter:card" content="${String(tw.card || 'summary_large_image').replace(/"/g, '&quot;')}">`);
+    if (tw.title || metaObj.title) tags.push(`<meta name="twitter:title" content="${String(tw.title || metaObj.title).replace(/"/g, '&quot;')}">`);
+    if (tw.description || metaObj.description) tags.push(`<meta name="twitter:description" content="${String(tw.description || metaObj.description).replace(/"/g, '&quot;')}">`);
+    if (tw.image) tags.push(`<meta name="twitter:image" content="${String(tw.image).replace(/"/g, '&quot;')}">`);
+    if (tw.creator) tags.push(`<meta name="twitter:creator" content="${String(tw.creator).replace(/"/g, '&quot;')}">`);
+  }
+
+  return tags.join('\n');
+}
+
 export const builtinHelpers = {
   /**
    * Merges class names and resolves Tailwind CSS class conflicts.
    */
   cn(...inputs: any[]): string {
     return cn(...inputs);
+  },
+
+  /**
+   * Renders meta tags for SEO.
+   */
+  meta(metaObj?: any): string {
+    return renderMetaTags(metaObj);
+  },
+
+  /**
+   * Alias for meta SEO helper.
+   */
+  seo(metaObj?: any): string {
+    return renderMetaTags(metaObj);
+  },
+
+  /**
+   * Translation helper fallback.
+   */
+  tr(key: string, params: Record<string, any> = {}): string {
+    return key;
+  },
+
+  /**
+   * Localized URL helper.
+   */
+  localeUrl(targetPath: string = '/', _targetLocale?: string): string {
+    return targetPath;
   },
 
   /**
