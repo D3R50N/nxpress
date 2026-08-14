@@ -5,6 +5,10 @@
   "appDir": "app",
   "componentsDir": "components",
   "publicDir": "public",
+  "i18n": {
+    "locales": ["fr", "en"],
+    "defaultLocale": "fr"
+  },
   "globals": {
      "siteName": "Nexpress EJS Store",
     "author": "Nexpress Team",
