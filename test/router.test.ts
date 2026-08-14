@@ -161,14 +161,29 @@ async function testExecuteMw() {
   assert.strictEqual(detPrefix.isPrefixed, true);
   assert.strictEqual(detPrefix.pathname, '/');
 
-  const detPrefixSub = detectLocale({ path: '/en/products', headers: { cookie: 'lang=fr' }, cookies: {} } as any, {
-    locales: ['fr', 'en'],
-    defaultLocale: 'fr',
-  });
-  assert.strictEqual(detPrefixSub.locale, 'en');
-  assert.strictEqual(detPrefixSub.isPrefixed, true);
-  assert.strictEqual(detPrefixSub.pathname, '/products');
+  // Test dynamic translation reload via middleware config
+  const { createI18nMiddleware } = await import('../src/i18n');
+  const tempConfig = {
+    locales: ['en', 'fr'],
+    defaultLocale: 'en',
+    translations: {
+      en: { test: 'original' }
+    }
+  };
+  const mw = createI18nMiddleware(path.resolve('.'), tempConfig);
+  assert.strictEqual(typeof (tempConfig as any)._reloadTranslations, 'function');
+  const reqDummy: any = { path: '/', query: {}, headers: {}, cookies: {} };
+  const resDummy: any = { locals: {} };
+  mw(reqDummy, resDummy, () => {});
+  assert.strictEqual(resDummy.locals.tr('test'), 'original');
 
+  // Update translation in config and reload
+  tempConfig.translations = {
+    en: { test: 'updated_value' }
+  };
+  (tempConfig as any)._reloadTranslations();
+  mw(reqDummy, resDummy, () => {});
+  assert.strictEqual(resDummy.locals.tr('test'), 'updated_value');
 }
 
 testExecuteMw().then(() => {

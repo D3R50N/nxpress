@@ -12,8 +12,6 @@ export interface I18nConfig {
   translations?: Record<string, Record<string, any>>;
 }
 
-const translationsCache = new Map<string, Record<string, any>>();
-
 /**
  * Loads translations dictionary for all configured locales.
  */
@@ -35,9 +33,16 @@ export function loadTranslations(
 
   const loader = getJitiLoader(rootDir);
 
-  for (const loc of config.locales) {
-    if (translations[loc]) continue;
+  const discoveredLocales = fs
+    .readdirSync(localesDir)
+    .filter((f) => f.match(/\.(json|ts|js|mjs)$/))
+    .map((f) => f.replace(/\.(json|ts|js|mjs)$/, ""));
 
+  const targetLocales = Array.from(
+    new Set([...(config.locales || []), ...discoveredLocales]),
+  );
+
+  for (const loc of targetLocales) {
     const candidates = [
       path.join(localesDir, `${loc}.json`),
       path.join(localesDir, `${loc}.ts`),
@@ -49,7 +54,8 @@ export function loadTranslations(
       if (fs.existsSync(file)) {
         try {
           if (file.endsWith(".json")) {
-            translations[loc] = JSON.parse(fs.readFileSync(file, "utf8"));
+            const raw = fs.readFileSync(file, "utf8");
+            translations[loc] = JSON.parse(raw);
           } else {
             const mod = loader(file);
             translations[loc] = mod.default || mod;
@@ -227,7 +233,13 @@ export function createI18nMiddleware(
   rootDir: string,
   config: I18nConfig,
 ): RequestHandler {
-  const translations = loadTranslations(rootDir, config);
+  let translations = loadTranslations(rootDir, config);
+
+  (config as any)._reloadTranslations = () => {
+    translations = loadTranslations(rootDir, config);
+    return translations;
+  };
+  (config as any)._getTranslations = () => translations;
 
   return (req: Request, res: Response, next: NextFunction) => {
     const { locale, pathname, isPrefixed, hasQueryLocale } = detectLocale(
@@ -245,8 +257,12 @@ export function createI18nMiddleware(
       } catch (_e) {}
     }
 
+    const currentTranslations = (config as any)._getTranslations
+      ? (config as any)._getTranslations()
+      : translations;
+
     const tr = (key: string, params: Record<string, any> = {}) =>
-      translate(translations, locale, config.defaultLocale, key, params);
+      translate(currentTranslations, locale, config.defaultLocale, key, params);
 
     const localeUrl = (targetPath: string = "/", targetLocale?: string) => {
       const loc = targetLocale || locale;

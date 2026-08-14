@@ -31,6 +31,7 @@ export interface NxpressServerOptions {
   pagesDir?: string;
   componentsDir?: string;
   publicDir?: string;
+  localesDir?: string;
   engine?: TemplateEngine;
   port?: number;
   tailwind?: boolean | TailwindOptions;
@@ -58,9 +59,9 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
   // Enable Tailwind by default unless explicitly set to false
   let tailwindCssUrl = "/tailwind.css";
   const hasTailwindConfig = options.tailwind !== false;
+  const twOpts = typeof options.tailwind === "object" ? options.tailwind : {};
 
   if (hasTailwindConfig) {
-    const twOpts = typeof options.tailwind === "object" ? options.tailwind : {};
     tailwindCssUrl = compileTailwindCss(rootDir, publicDir, twOpts);
   }
 
@@ -111,7 +112,27 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
   app.use(express.urlencoded({ extended: true }));
 
   // i18n localization middleware
-  const i18nConfig = options.i18n || fileConfig.i18n;
+  let i18nConfig = options.i18n || fileConfig.i18n;
+  const localesDir = path.resolve(
+    rootDir,
+    options.localesDir || i18nConfig?.localesDir || "locales",
+  );
+
+  if (!i18nConfig && fs.existsSync(localesDir)) {
+    const discoveredLocales = fs
+      .readdirSync(localesDir)
+      .filter((f) => f.match(/\.(json|ts|js|mjs)$/))
+      .map((f) => f.replace(/\.(json|ts|js|mjs)$/, ""));
+    if (discoveredLocales.length > 0) {
+      i18nConfig = {
+        locales: discoveredLocales,
+        defaultLocale: discoveredLocales.includes("en") ? "en" : discoveredLocales[0],
+        localesDir: path.relative(rootDir, localesDir) || "locales",
+      };
+      options.i18n = i18nConfig;
+    }
+  }
+
   if (i18nConfig && Array.isArray(i18nConfig.locales) && i18nConfig.locales.length > 0) {
     app.use(createI18nMiddleware(rootDir, i18nConfig));
   }
@@ -178,6 +199,9 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
   }
 
   let activeRouter = express.Router();
+  app.use((req, res, next) => {
+    activeRouter(req, res, next);
+  });
 
   const reloadRoutes = () => {
     try {
@@ -207,25 +231,18 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
     }
   };
 
-  const originalListen = app.listen.bind(app);
-  let isListenSetup = false;
+  reloadRoutes();
 
-  app.listen = function (...args: any[]) {
-    if (!isListenSetup) {
-      isListenSetup = true;
-
-      reloadRoutes();
-
-      app.use((req, res, next) => {
-        activeRouter(req, res, next);
-      });
-
-      if (isDevMode(options)) {
-        setupDevWatcher(options, reloadRoutes);
+  if (isDevMode(options)) {
+    try {
+      if (options.tailwind !== false) {
+        compileTailwindCss(rootDir, publicDir, twOpts);
       }
+      setupDevWatcher(options, reloadRoutes);
+    } catch (err) {
+      logger.warn("Dev watcher or Tailwind compiler skipped:", err);
     }
-    return originalListen(...args);
-  } as any;
+  }
 
   return app;
 }
@@ -243,6 +260,13 @@ function setupDevWatcher(
     options.componentsDir || path.join(rootDir, "components");
   const publicDir = options.publicDir || path.join(rootDir, "public");
 
+  const fileConfig = loadConfigFile(rootDir);
+  const i18nConfig = options.i18n || fileConfig.i18n;
+  const localesDir = path.resolve(
+    rootDir,
+    options.localesDir || i18nConfig?.localesDir || "locales",
+  );
+
   const tailwindOptions =
     typeof options.tailwind === "object" ? options.tailwind : {};
   const tailwindInput = tailwindOptions.input
@@ -259,6 +283,7 @@ function setupDevWatcher(
     appDir,
     componentsDir,
     publicDir,
+    localesDir,
     tailwindInput,
     path.join(rootDir, ".env"),
     path.join(rootDir, "nxpress.config.json"),
@@ -301,10 +326,24 @@ function setupDevWatcher(
     } catch (e) {}
 
     if (filename.startsWith("nxpress.config") || filename === ".env") {
-      const fileConfig = loadConfigFile(rootDir);
-      options.globals = fileConfig.globals || {};
+      const updatedConfig = loadConfigFile(rootDir);
+      options.globals = updatedConfig.globals || {};
+      options.i18n = updatedConfig.i18n || options.i18n;
+      if (options.i18n && typeof (options.i18n as any)._reloadTranslations === "function") {
+        (options.i18n as any)._reloadTranslations();
+      }
       logger.info(`Configuration updated from \`${relPath}\``);
       reloadRoutes();
+      notifyLiveReload();
+      return;
+    }
+
+    if (filePath.startsWith(localesDir)) {
+      const activeI18n = options.i18n || fileConfig.i18n;
+      if (activeI18n && typeof (activeI18n as any)._reloadTranslations === "function") {
+        (activeI18n as any)._reloadTranslations();
+      }
+      logger.info(`Translations updated from \`${relPath}\``);
       notifyLiveReload();
       return;
     }
