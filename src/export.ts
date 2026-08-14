@@ -272,6 +272,7 @@ export async function exportStatic(
 
             // Metadata export
             let metaFn: any = null;
+            let rawExportMetadata: any = null;
             if (typeof companionModule.metadata === "function") {
               metaFn = companionModule.metadata;
             } else if (
@@ -283,16 +284,12 @@ export async function exportStatic(
               companionModule.metadata &&
               typeof companionModule.metadata === "object"
             ) {
-              pageProps.metadata = {
-                ...(pageProps.metadata || {}),
-                ...companionModule.metadata,
-              };
+              rawExportMetadata = { ...companionModule.metadata };
             } else if (
               companionModule.default?.metadata &&
               typeof companionModule.default.metadata === "object"
             ) {
-              pageProps.metadata = {
-                ...(pageProps.metadata || {}),
+              rawExportMetadata = {
                 ...companionModule.default.metadata,
               };
             }
@@ -305,11 +302,15 @@ export async function exportStatic(
               };
               const metaRes = await metaFn(reqMock, resMock, exportGlobals);
               if (metaRes && typeof metaRes === "object") {
-                pageProps.metadata = {
-                  ...(pageProps.metadata || {}),
+                rawExportMetadata = {
+                  ...(rawExportMetadata || {}),
                   ...metaRes,
                 };
               }
+            }
+
+            if (rawExportMetadata) {
+              (reqMock as any)._nxpressMetadataHtml = renderMetaTags(rawExportMetadata);
             }
           } catch (err) {
             logger.error(`Error in companion props for ${templateFile}:`, err);
@@ -344,7 +345,6 @@ export async function exportStatic(
         const systemLocals: Record<string, any> = {
           year: now.getFullYear(),
           now,
-          tailwind: `<link rel="stylesheet" href="${tailwindCssUrl}"/>`,
           E: getFilteredEnv(options.secureEnv ?? fileConfig.secureEnv ?? true),
           env: getFilteredEnv(options.secureEnv ?? fileConfig.secureEnv ?? true),
           ...builtinHelpers,
@@ -390,12 +390,6 @@ export async function exportStatic(
           ...pageProps,
         };
 
-        if (mergedProps.metadata && typeof mergedProps.metadata === "object") {
-          mergedProps.metadata = renderMetaTags(mergedProps.metadata);
-        } else if (typeof mergedProps.metadata !== "string") {
-          mergedProps.metadata = "";
-        }
-
         const templateFullPath = path.resolve(appDir, templateFile);
         const layouts = findLayoutsForRoute(
           rootDir,
@@ -412,7 +406,8 @@ export async function exportStatic(
           });
         }
 
-        let finalHtml = injectMetadata(renderedHtml, mergedProps.metadata);
+        const metadataHtml = (reqMock as any)._nxpressMetadataHtml || "";
+        let finalHtml = injectMetadata(renderedHtml, metadataHtml);
         finalHtml = injectTailwindCss(finalHtml, tailwindCssUrl);
         finalHtml = injectClientScript(finalHtml);
 

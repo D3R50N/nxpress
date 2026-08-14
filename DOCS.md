@@ -201,11 +201,10 @@ Function used inside templates to include reusable components from `componentsDi
 <%- $("Navbar", { activePage: "home" }) %>
 ```
 
-### 5. Automatic Helpers and Assets
+#### 5. Date and Time Variables
 
 - `year`: Current 4-digit year (`2026`).
 - `now`: Current JavaScript `Date` object instance.
-- `tailwind`: Ready-to-render HTML `<link>` tag string: `<link rel="stylesheet" href="/tailwind.css"/>`.
 
 ---
 
@@ -222,6 +221,26 @@ Nxpress registers built-in helper functions accessible in all supported template
 - `capitalize(val)`: Capitalizes the first letter of string.
 - `truncate(val, len)`: Truncates string to specified length (default `50`) with `...`.
 - `join(arr, sep)`: Joins array elements into a string using separator (default `", "`).
+
+### Zero-Config Head Injections (SEO Metadata & Tailwind CSS)
+
+Nxpress automatically compiles Tailwind CSS and renders companion file metadata (`title`, `description`, OpenGraph, Twitter), and **injects them directly before `</head>`** into your layout files.
+
+No template variables or manual tags (`<%- tailwind %>` or `<%- metadata %>`) are needed in your templates:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind stylesheet and SEO meta tags are injected here automatically before </head> -->
+</head>
+<body>
+  <%- body %>
+</body>
+</html>
+```
 
 ### Comparisons and Logic Helpers
 

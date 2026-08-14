@@ -581,6 +581,7 @@ export async function renderPageView(
 
       // Handle metadata export (object or function)
       let metaFn: any = null;
+      let rawMetadata: any = null;
       if (typeof dataModule.metadata === "function") {
         metaFn = dataModule.metadata;
       } else if (
@@ -589,13 +590,12 @@ export async function renderPageView(
       ) {
         metaFn = dataModule.default.metadata;
       } else if (dataModule.metadata && typeof dataModule.metadata === "object") {
-        pageProps.metadata = { ...(pageProps.metadata || {}), ...dataModule.metadata };
+        rawMetadata = { ...dataModule.metadata };
       } else if (
         dataModule.default?.metadata &&
         typeof dataModule.default.metadata === "object"
       ) {
-        pageProps.metadata = {
-          ...(pageProps.metadata || {}),
+        rawMetadata = {
           ...dataModule.default.metadata,
         };
       }
@@ -609,8 +609,12 @@ export async function renderPageView(
         };
         const metaRes = await metaFn(req, res, globalsContext);
         if (metaRes && typeof metaRes === "object") {
-          pageProps.metadata = { ...(pageProps.metadata || {}), ...metaRes };
+          rawMetadata = { ...(rawMetadata || {}), ...metaRes };
         }
+      }
+
+      if (rawMetadata) {
+        (req as any)._nxpressMetadataHtml = renderMetaTags(rawMetadata);
       }
     } catch (err) {
       logger.error(`Error executing companion file for ${templateFile}:`, err);
@@ -639,7 +643,6 @@ export async function renderPageView(
     "E",
     "env",
     "$",
-    "tailwind",
     "I",
     "cn",
   ];
@@ -648,12 +651,6 @@ export async function renderPageView(
       logger.warn(`Reserved key "${key}" in props() was overridden by system.`);
     }
     mergedProps[key] = res.locals[key];
-  }
-
-  if (mergedProps.metadata && typeof mergedProps.metadata === "object") {
-    mergedProps.metadata = renderMetaTags(mergedProps.metadata);
-  } else if (typeof mergedProps.metadata !== "string") {
-    mergedProps.metadata = "";
   }
 
   const templateFullPath = path.resolve(appDir, templateFile);
@@ -673,7 +670,8 @@ export async function renderPageView(
       });
     }
 
-    let finalHtml = injectMetadata(renderedHtml, mergedProps.metadata);
+    const metadataHtml = (req as any)._nxpressMetadataHtml || "";
+    let finalHtml = injectMetadata(renderedHtml, metadataHtml);
     finalHtml = injectTailwindCss(finalHtml, tailwindCssUrl);
     finalHtml = injectClientScript(finalHtml);
     if (isDevMode(options)) {
