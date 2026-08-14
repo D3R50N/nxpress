@@ -23,6 +23,10 @@
       "default": "app",
       "description": "Directory for file-based route templates and API endpoints"
     },
+    "pagesDir": {
+      "type": "string",
+      "description": "Optional alias directory for file-based routes"
+    },
     "componentsDir": {
       "type": "string",
       "default": "components",
@@ -32,6 +36,71 @@
       "type": "string",
       "default": "public",
       "description": "Directory for static asset serving"
+    },
+    "localesDir": {
+      "type": "string",
+      "default": "locales",
+      "description": "Directory containing translation JSON dictionaries (e.g. locales/en.json)"
+    },
+    "outDir": {
+      "type": "string",
+      "default": "out",
+      "description": "Output directory for static site generation (SSG) with nxpress export"
+    },
+    "tailwind": {
+      "oneOf": [
+        {
+          "type": "boolean",
+          "description": "Enable or disable automatic Tailwind CSS compilation"
+        },
+        {
+          "type": "object",
+          "description": "Advanced Tailwind CSS compilation options",
+          "properties": {
+            "entry": {
+              "type": "string",
+              "description": "Custom Tailwind input CSS file (e.g. 'app.css')"
+            },
+            "output": {
+              "type": "string",
+              "description": "Compiled CSS destination path (e.g. 'public/tailwind.css')"
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "default": true,
+      "description": "Tailwind CSS compilation configuration"
+    },
+    "i18n": {
+      "type": "object",
+      "description": "Internationalization (i18n) configuration",
+      "properties": {
+        "locales": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of supported language codes (e.g. ['en', 'fr'])"
+        },
+        "defaultLocale": {
+          "type": "string",
+          "default": "en",
+          "description": "Default fallback locale"
+        },
+        "prefixDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to prefix URLs for the default locale (e.g. /en/... vs /...)"
+        },
+        "cookieName": {
+          "type": "string",
+          "default": "lang",
+          "description": "Cookie name used to persist user language selection"
+        }
+      },
+      "required": ["locales", "defaultLocale"],
+      "additionalProperties": false
     },
     "globals": {
       "type": "object",

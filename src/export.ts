@@ -38,7 +38,6 @@ export interface NxpressExportOptions {
   tailwind?: boolean | TailwindOptions;
   globals?: Record<string, any>;
   secureEnv?: boolean;
-  clean?: boolean;
   i18n?: I18nConfig;
 }
 
@@ -110,8 +109,7 @@ export async function exportStatic(
     options.outDir || fileConfig.outDir || "out",
   );
 
-  const clean = options.clean ?? fileConfig.clean ?? true;
-  if (clean && fs.existsSync(outDir)) {
+  if (fs.existsSync(outDir)) {
     fs.rmSync(outDir, { recursive: true, force: true });
   }
   fs.mkdirSync(outDir, { recursive: true });
