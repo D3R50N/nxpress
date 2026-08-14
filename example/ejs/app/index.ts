@@ -58,3 +58,4 @@ export default async function props(req: Request, res: Response) {
     products,
   };
 }
+
