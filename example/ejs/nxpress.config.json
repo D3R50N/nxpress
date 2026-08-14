@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/@nxpress/core@latest/schema.json",
+  "$schema": "https://www.unpkg.com/@nxpress/core@latest/schema.json",
   "port": 3001,
   "engine": "ejs",
   "appDir": "app",
@@ -10,7 +10,7 @@
     "defaultLocale": "en"
   },
   "globals": {
-     "siteName": "Nexpress EJS Store",
+    "siteName": "Nexpress EJS Store",
     "author": "Nexpress Team",
     "version": "1.0.0",
     "currency": "€",

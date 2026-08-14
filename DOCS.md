@@ -142,13 +142,13 @@ export const metadata: NxpressMetadata = {
 };
 ```
 
-Dynamic metadata function is also supported:
+Dynamic metadata function receives `req`, `res`, and `globals` (including global config, `G`, and `locals`):
 
 ```ts
-export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
+export async function metadata(req: Request, res: Response, globals: Record<string, any>): Promise<NxpressMetadata> {
   return {
-    title: `Product #${req.params.id} - Nxpress`,
-    description: 'Dynamic product details page.'
+    title: `${globals.siteName || 'Nxpress'} - Product #${req.params.id}`,
+    description: `Dynamic product details page for ${globals.lang || 'en'}.`
   };
 }
 ```
@@ -247,17 +247,21 @@ Nxpress registers built-in helper functions accessible in all supported template
 <%- I('sun', 'w-5 h-5 hidden dark:block') %>
 ```
 
-### SEO and Metadata Helper (`meta`)
+### SEO and Metadata (`metadata`)
 
-- `meta([metadata])`: Generates `<title>`, `<meta name="description">`, `<link rel="canonical">`, OpenGraph, and Twitter tags from an `NxpressMetadata` object or template variables.
+Nxpress automatically renders companion file metadata into SEO and social HTML tags and **injects them automatically before `</head>`** (just like Tailwind CSS).
+
+If you want explicit control over placement in your layout or head template, you can still use `<%- metadata %>`:
 
 ```html
-<!-- Rendering dynamic SEO tags in EJS head -->
+<!-- Explicit placement in head (optional, automatic injection is enabled by default) -->
 <head>
-  <%- meta(metadata) %>
+  <%- metadata %>
   <%- tailwind %>
 </head>
 ```
+
+- `metadata`: Injected string containing rendered `<title>`, `<meta name="description">`, `<link rel="canonical">`, OpenGraph (`og:*`), and Twitter (`twitter:*`) tags. Automatically injected into `<head>` if omitted.
 
 ### Collections and Utility Helpers
 

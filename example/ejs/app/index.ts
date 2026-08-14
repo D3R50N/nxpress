@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction, Handler } from "express";
+import type { Request, Response, NextFunction, Handler, NxpressMetadata } from "../../../dist";
 
 export const middlewares: Handler[] = [
   (req, res, n) => {
@@ -11,6 +11,22 @@ export const middleware: Handler = (r, res) => {
   res.setHeader("X-Custom-Route-Middleware", "index-page");
   console.log("index middleware2");
 };
+
+export function metadata(
+  req: Request,
+  res: Response,
+  globals: Record<string, any>,
+): NxpressMetadata {
+  return {
+    title: `Nxpress - ${globals.siteName}`,
+    description:
+      "Modern web framework with file-based routing, SSR and static site generation.",
+    openGraph: {
+      title: "Nxpress Framework",
+      description: "Build fast with file-based routing and SSR.",
+    },
+  };
+}
 
 export default async function props(req: Request, res: Response) {
   let joke = null;
@@ -58,4 +74,6 @@ export default async function props(req: Request, res: Response) {
     products,
   };
 }
+
+
 

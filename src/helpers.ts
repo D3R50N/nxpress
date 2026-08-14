@@ -93,7 +93,8 @@ export interface NxpressMetadata {
 /**
  * Renders HTML meta tags for SEO from a metadata object.
  */
-export function renderMetaTags(metaObj?: NxpressMetadata): string {
+export function renderMetaTags(metaObj?: NxpressMetadata | string): string {
+  if (typeof metaObj === 'string') return metaObj;
   if (!metaObj || typeof metaObj !== 'object') return '';
 
   const tags: string[] = [];
@@ -141,19 +142,32 @@ export function renderMetaTags(metaObj?: NxpressMetadata): string {
   return tags.join('\n');
 }
 
+/**
+ * Automatically injects rendered metadata HTML before </head> if missing.
+ */
+export function injectMetadata(html: string, metadataHtml?: string): string {
+  if (!metadataHtml || !metadataHtml.trim()) return html;
+  if (html.includes(metadataHtml.trim())) {
+    return html;
+  }
+
+  if (html.includes("</head>")) {
+    return html.replace("</head>", `  ${metadataHtml}\n</head>`);
+  }
+
+  if (html.includes("<head>")) {
+    return html.replace("<head>", `<head>\n  ${metadataHtml}\n`);
+  }
+
+  return `${metadataHtml}\n${html}`;
+}
+
 export const builtinHelpers = {
   /**
    * Merges class names and resolves Tailwind CSS class conflicts.
    */
   cn(...inputs: any[]): string {
     return cn(...inputs);
-  },
-
-  /**
-   * Renders meta tags for SEO.
-   */
-  meta(metaObj?: any): string {
-    return renderMetaTags(metaObj);
   },
 
   /**

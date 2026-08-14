@@ -10,6 +10,8 @@ import {
   registerBuiltinHelpers,
   registerLiquidFilters,
   registerNunjucksHelpers,
+  renderMetaTags,
+  injectMetadata,
 } from "./helpers";
 import {
   findLayoutsForRoute,
@@ -296,7 +298,12 @@ export async function exportStatic(
             }
 
             if (metaFn) {
-              const metaRes = await metaFn(reqMock, resMock);
+              const exportGlobals = {
+                ...options.globals,
+                ...fileConfig.globals,
+                ...builtinHelpers,
+              };
+              const metaRes = await metaFn(reqMock, resMock, exportGlobals);
               if (metaRes && typeof metaRes === "object") {
                 pageProps.metadata = {
                   ...(pageProps.metadata || {}),
@@ -383,6 +390,12 @@ export async function exportStatic(
           ...pageProps,
         };
 
+        if (mergedProps.metadata && typeof mergedProps.metadata === "object") {
+          mergedProps.metadata = renderMetaTags(mergedProps.metadata);
+        } else if (typeof mergedProps.metadata !== "string") {
+          mergedProps.metadata = "";
+        }
+
         const templateFullPath = path.resolve(appDir, templateFile);
         const layouts = findLayoutsForRoute(
           rootDir,
@@ -399,7 +412,8 @@ export async function exportStatic(
           });
         }
 
-        let finalHtml = injectTailwindCss(renderedHtml, tailwindCssUrl);
+        let finalHtml = injectMetadata(renderedHtml, mergedProps.metadata);
+        finalHtml = injectTailwindCss(finalHtml, tailwindCssUrl);
         finalHtml = injectClientScript(finalHtml);
 
         // Determine output HTML filepath with i18n subdirectories

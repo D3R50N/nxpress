@@ -2,7 +2,7 @@ import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
 import { fileToRoutePath, findLayoutsForRoute, getRouteMiddlewares } from '../src/router';
-import { builtinHelpers } from '../src/helpers';
+import { builtinHelpers, renderMetaTags, injectMetadata } from '../src/helpers';
 import { renderComponent, registerComponents } from '../src/components';
 import { getFilteredEnv } from '../src/env';
 
@@ -39,7 +39,7 @@ assert.strictEqual(builtinHelpers.add(5, 3), 8);
 assert.strictEqual(builtinHelpers.ternary(true, 'yes', 'no'), 'yes');
 assert.strictEqual(builtinHelpers.eq(5, 5), true);
 assert.strictEqual(builtinHelpers.ne(5, 10), true);
-const metaHtml = builtinHelpers.meta({
+const metaHtml = renderMetaTags({
   title: 'My Title',
   description: 'My Description',
   openGraph: { title: 'OG Title', image: '/og.png' }
@@ -48,6 +48,14 @@ assert.ok(metaHtml.includes('<title>My Title</title>'));
 assert.ok(metaHtml.includes('content="My Description"'));
 assert.ok(metaHtml.includes('property="og:title" content="OG Title"'));
 assert.ok(metaHtml.includes('property="og:image" content="/og.png"'));
+assert.strictEqual(renderMetaTags(metaHtml), metaHtml);
+assert.strictEqual(renderMetaTags(undefined), '');
+const injectedHtml = injectMetadata('<html><head></head><body></body></html>', metaHtml);
+assert.ok(injectedHtml.includes('<title>My Title</title>'));
+assert.ok(injectedHtml.includes('</head>'));
+// No duplicate injection if already present
+const doubleInjected = injectMetadata(injectedHtml, metaHtml);
+assert.strictEqual(doubleInjected, injectedHtml);
 
 console.log('Testing case-insensitive renderComponent...');
 const exampleComponentsDir = path.resolve('./example/ejs/components');
@@ -113,7 +121,6 @@ async function testExecuteMw() {
     rootDir: path.resolve('./example/ejs'),
     outDir,
     tailwind: false,
-    clean: true,
   });
   assert.ok(exportRes.exportedFiles.length > 0);
   assert.ok(fs.existsSync(path.join(outDir, 'index.html')));

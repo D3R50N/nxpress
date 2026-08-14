@@ -26,6 +26,8 @@ import {
   registerBuiltinHelpers,
   registerLiquidFilters,
   registerNunjucksHelpers,
+  renderMetaTags,
+  injectMetadata,
 } from "./helpers";
 
 const etaEngine = new Eta({
@@ -599,7 +601,13 @@ export async function renderPageView(
       }
 
       if (metaFn) {
-        const metaRes = await metaFn(req, res);
+        const globalsContext = {
+          ...options.globals,
+          ...(res.locals.G || {}),
+          ...(res.locals.global || {}),
+          ...res.locals,
+        };
+        const metaRes = await metaFn(req, res, globalsContext);
         if (metaRes && typeof metaRes === "object") {
           pageProps.metadata = { ...(pageProps.metadata || {}), ...metaRes };
         }
@@ -642,6 +650,12 @@ export async function renderPageView(
     mergedProps[key] = res.locals[key];
   }
 
+  if (mergedProps.metadata && typeof mergedProps.metadata === "object") {
+    mergedProps.metadata = renderMetaTags(mergedProps.metadata);
+  } else if (typeof mergedProps.metadata !== "string") {
+    mergedProps.metadata = "";
+  }
+
   const templateFullPath = path.resolve(appDir, templateFile);
   const layouts = findLayoutsForRoute(rootDir, appDir, templateFile, engine);
 
@@ -659,7 +673,8 @@ export async function renderPageView(
       });
     }
 
-    let finalHtml = injectTailwindCss(renderedHtml, tailwindCssUrl);
+    let finalHtml = injectMetadata(renderedHtml, mergedProps.metadata);
+    finalHtml = injectTailwindCss(finalHtml, tailwindCssUrl);
     finalHtml = injectClientScript(finalHtml);
     if (isDevMode(options)) {
       finalHtml = injectLiveReloadScript(finalHtml);

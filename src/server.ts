@@ -161,6 +161,7 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
     res.locals.global = globalObj;
     res.locals.R = requestObj;
     res.locals.req = requestObj;
+    res.locals.metadata = "";
     res.locals.$ = (name: string, props: Record<string, any> = {}) =>
       renderComponent(name, props, res.locals);
     for (const [k, v] of Object.entries(builtinHelpers)) {
