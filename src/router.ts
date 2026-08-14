@@ -38,7 +38,7 @@ try {
   registerNunjucksHelpers(nunjucks);
 } catch (_e) {}
 
-export function getJitiLoader(rootDir?: string) {
+export function getJitiLoader(rootDir?: string): ReturnType<typeof createJiti> {
   const baseDir = rootDir || process.cwd();
   const tsconfigPath = path.join(baseDir, "tsconfig.json");
   const hasTsConfig = fs.existsSync(tsconfigPath);
