@@ -158,6 +158,20 @@ export async function metadata(req: Request, res: Response): Promise<NxpressMeta
 }
 ```
 
+To use global configurations or constants in `metadata`, import them directly:
+
+```ts
+import config from '../nxpress.config.json';
+
+export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
+  const siteTitle = config.globals?.title || 'My Store';
+  return {
+    title: `${siteTitle} - Product #${req.params.id}`,
+    description: `Dynamic details for product #${req.params.id}.`
+  };
+}
+```
+
 ---
 
 ## 5. Injected Template Variables and Objects
