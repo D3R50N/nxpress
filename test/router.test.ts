@@ -233,10 +233,35 @@ async function testExecuteMw() {
   assert.deepStrictEqual(resEmpty, { props: null });
   const resUndef = await resolvePageProps({}, reqDummy, resDummy);
   assert.deepStrictEqual(resUndef, { props: null });
+
+  // 12. Case-insensitive API HTTP method detection
+  console.log('Testing case-insensitive findMethodHandler...');
+  const { findMethodHandler } = await import('../src/router');
+  const apiModuleUppercase = {
+    GET: () => 'get-upper',
+    POST: () => 'post-upper',
+    DELETE: () => 'del-upper'
+  };
+  const apiModuleMixed = {
+    Get: () => 'get-mixed',
+    post: () => 'post-lower',
+    Put: () => 'put-mixed'
+  };
+
+  assert.strictEqual(typeof findMethodHandler(apiModuleUppercase, 'get'), 'function');
+  assert.strictEqual(typeof findMethodHandler(apiModuleUppercase, 'post'), 'function');
+  assert.strictEqual(typeof findMethodHandler(apiModuleUppercase, 'delete'), 'function');
+  assert.strictEqual(findMethodHandler(apiModuleUppercase, 'put'), undefined);
+
+  assert.strictEqual(typeof findMethodHandler(apiModuleMixed, 'get'), 'function');
+  assert.strictEqual(typeof findMethodHandler(apiModuleMixed, 'post'), 'function');
+  assert.strictEqual(typeof findMethodHandler(apiModuleMixed, 'put'), 'function');
+  assert.strictEqual(findMethodHandler(apiModuleMixed, 'delete'), undefined);
 }
 
 testExecuteMw().then(() => {
   console.log('✅ All TS router path, export, i18n and helper tests passed!');
 });
+
 
 

@@ -339,21 +339,22 @@ Components stored in `componentsDir` (e.g. `components/Navbar.ejs`, `components/
 
 Any file under `app/api/` is registered as an API route handler.
 
-### HTTP Method Handlers
+### HTTP Method Handlers (Case-Insensitive)
 
-Each HTTP method is defined by an exported named function (`get`, `post`, `put`, `delete`, `patch`).
+Each HTTP method is defined by an exported named function. Exported method names are **case-insensitive** (`GET`, `get`, `POST`, `post`, `PUT`, `put`, `DELETE`, `delete`, `PATCH`, `patch`, `HEAD`, `head`, `OPTIONS`, `options`).
 
 ```ts
 import type { Request, Response } from '@nxpress/core';
 
-export function get(req: Request, res: Response) {
+// Uppercase or lowercase are both supported
+export async function GET(req: Request, res: Response) {
   return {
     status: 'ok',
     timestamp: new Date().toISOString()
   };
 }
 
-export function post(req: Request, res: Response) {
+export async function POST(req: Request, res: Response) {
   return {
     success: true,
     message: 'Data saved successfully'

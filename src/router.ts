@@ -70,7 +70,35 @@ export interface NxpressDataModule {
   ) => Promise<Record<string, any>> | Record<string, any>;
 }
 
-export type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
+export type HttpMethod =
+  | "get"
+  | "post"
+  | "put"
+  | "delete"
+  | "patch"
+  | "head"
+  | "options"
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "PATCH"
+  | "HEAD"
+  | "OPTIONS";
+
+export function findMethodHandler(
+  mod: any,
+  method: string,
+): ((req: Request, res: Response, next?: NextFunction) => any) | undefined {
+  if (!mod || typeof mod !== "object") return undefined;
+  const target = method.toLowerCase();
+  for (const key of Object.keys(mod)) {
+    if (key.toLowerCase() === target && typeof mod[key] === "function") {
+      return mod[key];
+    }
+  }
+  return undefined;
+}
 
 export interface RouterOptions {
   rootDir?: string;
@@ -730,12 +758,15 @@ export function registerRoutes(
     const routeMwWrapper = createRouteMiddlewareWrapper(fullPath, options.rootDir);
     const allMiddlewares = [...folderMws, routeMwWrapper];
 
-    const methods: HttpMethod[] = ["get", "post", "put", "delete", "patch"];
+    const methods: Array<
+      "get" | "post" | "put" | "delete" | "patch" | "head" | "options"
+    > = ["get", "post", "put", "delete", "patch", "head", "options"];
     let registered = false;
 
     methods.forEach((method) => {
-      if (typeof routeModule[method] === "function") {
-        app[method](
+      const initialHandler = findMethodHandler(routeModule, method);
+      if (initialHandler) {
+        (app as any)[method](
           routePath,
           ...allMiddlewares,
           async (req: Request, res: Response, next: NextFunction) => {
@@ -745,9 +776,7 @@ export function registerRoutes(
               } catch (e) {}
               const freshModule = loader(fullPath);
               const handler =
-                typeof freshModule[method] === "function"
-                  ? freshModule[method]
-                  : routeModule[method];
+                findMethodHandler(freshModule, method) || initialHandler;
               const result = await handler(req, res, next);
               if (
                 result !== undefined &&
