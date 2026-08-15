@@ -15,10 +15,9 @@ export const middleware: Handler = (r, res) => {
 export function metadata(
   req: Request,
   res: Response,
-  globals: Record<string, any>,
 ): NxpressMetadata {
   return {
-    title: `Nxpress - ${globals.siteName}`,
+    title: "Nxpress - Documentation & Starter",
     description:
       "Modern web framework with file-based routing, SSR and static site generation.",
     openGraph: {

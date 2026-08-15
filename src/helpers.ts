@@ -410,3 +410,70 @@ export function ejsToEta(content: string): string {
     .replace(/<%_/g, '<%-')
     .replace(/_%>/g, '-%>');
 }
+
+/**
+ * Resolves page props from a companion module export (function, object, primitive, or array).
+ */
+export async function resolvePageProps(
+  companionModule: any,
+  req: any,
+  res: any
+): Promise<Record<string, any>> {
+  if (!companionModule) return { props: null };
+
+  let rawValue: any = undefined;
+  let isResolved = false;
+
+  // 1. Named export 'props'
+  if (typeof companionModule.props === 'function') {
+    rawValue = await companionModule.props(req, res);
+    isResolved = true;
+  } else if (companionModule.props !== undefined) {
+    rawValue = companionModule.props;
+    isResolved = true;
+  }
+  // 2. default.props
+  else if (
+    companionModule.default &&
+    typeof companionModule.default.props === 'function'
+  ) {
+    rawValue = await companionModule.default.props(req, res);
+    isResolved = true;
+  } else if (
+    companionModule.default &&
+    companionModule.default.props !== undefined
+  ) {
+    rawValue = companionModule.default.props;
+    isResolved = true;
+  }
+  // 3. Default export
+  else if (typeof companionModule.default === 'function') {
+    rawValue = await companionModule.default(req, res);
+    isResolved = true;
+  } else if (companionModule.default !== undefined) {
+    rawValue = companionModule.default;
+    isResolved = true;
+  }
+  // 4. Companion module itself as a function
+  else if (typeof companionModule === 'function') {
+    rawValue = await companionModule(req, res);
+    isResolved = true;
+  }
+
+  if (!isResolved || rawValue === undefined) {
+    return { props: null };
+  }
+
+  // Plain object: spread into pageProps AND attach props
+  if (
+    typeof rawValue === 'object' &&
+    rawValue !== null &&
+    !Array.isArray(rawValue)
+  ) {
+    return { ...rawValue, props: rawValue };
+  }
+
+  // Primitive or array: assign to props
+  return { props: rawValue };
+}
+

@@ -2,7 +2,7 @@ import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
 import { fileToRoutePath, findLayoutsForRoute, getRouteMiddlewares } from '../src/router';
-import { builtinHelpers, renderMetaTags, injectMetadata } from '../src/helpers';
+import { builtinHelpers, renderMetaTags, injectMetadata, resolvePageProps } from '../src/helpers';
 import { renderComponent, registerComponents } from '../src/components';
 import { getFilteredEnv } from '../src/env';
 
@@ -184,6 +184,55 @@ async function testExecuteMw() {
   (tempConfig as any)._reloadTranslations();
   mw(reqDummy, resDummy, () => {});
   assert.strictEqual(resDummy.locals.tr('test'), 'updated_value');
+
+  // Test resolvePageProps with various export types
+  console.log('Testing resolvePageProps (objects, primitives, arrays, functions)...');
+  
+  // 1. Plain object export default -> properties spread + props object
+  const resObj = await resolvePageProps({ default: { title: 'Nxpress', count: 10 } }, reqDummy, resDummy);
+  assert.deepStrictEqual(resObj, { title: 'Nxpress', count: 10, props: { title: 'Nxpress', count: 10 } });
+
+  // 2. Function export default returning object -> properties spread + props object
+  const resFnObj = await resolvePageProps({ default: () => ({ title: 'FnNxpress', count: 20 }) }, reqDummy, resDummy);
+  assert.deepStrictEqual(resFnObj, { title: 'FnNxpress', count: 20, props: { title: 'FnNxpress', count: 20 } });
+
+  // 3. Named export props object -> properties spread + props object
+  const resNamedProps = await resolvePageProps({ props: { hello: 'world' } }, reqDummy, resDummy);
+  assert.deepStrictEqual(resNamedProps, { hello: 'world', props: { hello: 'world' } });
+
+  // 4. Named export props function -> properties spread + props object
+  const resNamedPropsFn = await resolvePageProps({ props: () => ({ hello: 'world fn' }) }, reqDummy, resDummy);
+  assert.deepStrictEqual(resNamedPropsFn, { hello: 'world fn', props: { hello: 'world fn' } });
+
+  // 5. Primitive string export default -> { props: string }
+  const resPrimStr = await resolvePageProps({ default: 'simple string' }, reqDummy, resDummy);
+  assert.deepStrictEqual(resPrimStr, { props: 'simple string' });
+
+  // 6. Primitive number export default -> { props: number }
+  const resPrimNum = await resolvePageProps({ default: 123 }, reqDummy, resDummy);
+  assert.deepStrictEqual(resPrimNum, { props: 123 });
+
+  // 7. Primitive boolean export default -> { props: boolean }
+  const resPrimBool = await resolvePageProps({ default: true }, reqDummy, resDummy);
+  assert.deepStrictEqual(resPrimBool, { props: true });
+
+  // 8. Array export default -> { props: array }
+  const resArray = await resolvePageProps({ default: ['a', 'b', 'c'] }, reqDummy, resDummy);
+  assert.deepStrictEqual(resArray, { props: ['a', 'b', 'c'] });
+
+  // 9. Function returning primitive
+  const resFnPrim = await resolvePageProps({ default: () => 42 }, reqDummy, resDummy);
+  assert.deepStrictEqual(resFnPrim, { props: 42 });
+
+  // 10. Function returning array
+  const resFnArray = await resolvePageProps({ default: () => [1, 2, 3] }, reqDummy, resDummy);
+  assert.deepStrictEqual(resFnArray, { props: [1, 2, 3] });
+
+  // 11. Empty or undefined companion -> { props: null }
+  const resEmpty = await resolvePageProps(null, reqDummy, resDummy);
+  assert.deepStrictEqual(resEmpty, { props: null });
+  const resUndef = await resolvePageProps({}, reqDummy, resDummy);
+  assert.deepStrictEqual(resUndef, { props: null });
 }
 
 testExecuteMw().then(() => {

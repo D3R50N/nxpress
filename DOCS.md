@@ -100,24 +100,29 @@ Every view template page can be paired with a TypeScript/JavaScript companion fi
 
 ### Props Export
 
-The recommended way to return data to a view is via default export.
+Companion files can return page data via a default function, named `props` function, or direct export (objects, arrays, primitives):
 
 ```ts
 import type { Request, Response } from '@nxpress/core';
 
+// 1. Default or named function (async or sync)
 export default async function props(req: Request, res: Response) {
-  const products = [
-    { id: 1, name: 'Laptop', price: 999 }
-  ];
-
   return {
     title: 'Store',
-    products
+    products: [{ id: 1, name: 'Laptop', price: 999 }]
   };
 }
 ```
 
-Backward Compatibility: Named export `export async function props(req, res)` is also supported.
+#### Supported Export Formats
+- **Async/Sync Function (`default` or `export function props`)**: Returns an object, array, or primitive.
+- **Direct Object Export (`export default { ... }` or `export const props = { ... }`)**: Static data objects.
+- **Direct Array / Primitive Export (`export default [1, 2, 3]` or `export default "Hello"`)**: Direct static lists or values.
+
+#### Template Access
+- **Plain Objects**: Properties are destructured directly into template locals (`<%= title %>`, `<%= products %>`) and also accessible through `props` (`<%= props.title %>`).
+- **Arrays / Primitives**: Accessible directly through `props` (`<%= props %>`, `<% props.forEach(...) %>`).
+- **No companion / No export**: `props` is always defined and defaults to `null`.
 
 ### Metadata and SEO Export (`metadata`)
 
@@ -142,13 +147,13 @@ export const metadata: NxpressMetadata = {
 };
 ```
 
-Dynamic metadata function receives `req`, `res`, and `globals` (including global config, `G`, and `locals`):
+Dynamic metadata function receives `req` and `res`:
 
 ```ts
-export async function metadata(req: Request, res: Response, globals: Record<string, any>): Promise<NxpressMetadata> {
+export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
   return {
-    title: `${globals.siteName || 'Nxpress'} - Product #${req.params.id}`,
-    description: `Dynamic product details page for ${globals.lang || 'en'}.`
+    title: `Product #${req.params.id}`,
+    description: `Dynamic product details page.`
   };
 }
 ```

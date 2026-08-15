@@ -12,6 +12,7 @@ import {
   registerNunjucksHelpers,
   renderMetaTags,
   injectMetadata,
+  resolvePageProps,
 } from "./helpers";
 import {
   findLayoutsForRoute,
@@ -251,24 +252,12 @@ export async function exportStatic(
 
         if (companionModule) {
           try {
-            let propsFn: any = null;
-            if (typeof companionModule.props === "function") {
-              propsFn = companionModule.props;
-            } else if (
-              companionModule.default &&
-              typeof companionModule.default.props === "function"
-            ) {
-              propsFn = companionModule.default.props;
-            } else if (typeof companionModule.default === "function") {
-              propsFn = companionModule.default;
-            } else if (typeof companionModule === "function") {
-              propsFn = companionModule;
-            }
-
-            if (propsFn) {
-              const result = await propsFn(reqMock, resMock);
-              pageProps = { ...pageProps, ...result };
-            }
+            const resolvedProps = await resolvePageProps(
+              companionModule,
+              reqMock,
+              resMock
+            );
+            pageProps = { ...pageProps, ...resolvedProps };
 
             // Metadata export
             let metaFn: any = null;
@@ -295,12 +284,7 @@ export async function exportStatic(
             }
 
             if (metaFn) {
-              const exportGlobals = {
-                ...options.globals,
-                ...fileConfig.globals,
-                ...builtinHelpers,
-              };
-              const metaRes = await metaFn(reqMock, resMock, exportGlobals);
+              const metaRes = await metaFn(reqMock, resMock);
               if (metaRes && typeof metaRes === "object") {
                 rawExportMetadata = {
                   ...(rawExportMetadata || {}),

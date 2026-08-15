@@ -28,6 +28,7 @@ import {
   registerNunjucksHelpers,
   renderMetaTags,
   injectMetadata,
+  resolvePageProps,
 } from "./helpers";
 
 const etaEngine = new Eta({
@@ -560,24 +561,8 @@ export async function renderPageView(
         dataModule = loader(companionPath);
       }
 
-      let propsFn: any = null;
-      if (typeof dataModule.props === "function") {
-        propsFn = dataModule.props;
-      } else if (
-        dataModule.default &&
-        typeof dataModule.default.props === "function"
-      ) {
-        propsFn = dataModule.default.props;
-      } else if (typeof dataModule.default === "function") {
-        propsFn = dataModule.default;
-      } else if (typeof dataModule === "function") {
-        propsFn = dataModule;
-      }
-
-      if (propsFn) {
-        const result = await propsFn(req, res);
-        pageProps = { ...pageProps, ...result };
-      }
+      const resolvedProps = await resolvePageProps(dataModule, req, res);
+      pageProps = { ...pageProps, ...resolvedProps };
 
       // Handle metadata export (object or function)
       let metaFn: any = null;
@@ -601,13 +586,7 @@ export async function renderPageView(
       }
 
       if (metaFn) {
-        const globalsContext = {
-          ...options.globals,
-          ...(res.locals.G || {}),
-          ...(res.locals.global || {}),
-          ...res.locals,
-        };
-        const metaRes = await metaFn(req, res, globalsContext);
+        const metaRes = await metaFn(req, res);
         if (metaRes && typeof metaRes === "object") {
           rawMetadata = { ...(rawMetadata || {}), ...metaRes };
         }
