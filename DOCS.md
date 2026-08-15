@@ -672,6 +672,205 @@ When running `nxpress export`, Nxpress compiles every page for each configured l
 
 Each static HTML file is pre-rendered with the corresponding translated strings (`tr()`), so multi-language websites work out of the box on static hosts (Vercel, Netlify, GitHub Pages, S3/CloudFront) without requiring a Node.js server.
 
+---
+
+## 17. Practical Recipes & Use Cases
+
+### 1. E-Commerce Product Catalog (Dynamic Routes, Props, SEO & Components)
+
+**Project Structure:**
+```bash
+app/
+├── layout.ejs              # Global root layout with <head> and navbar
+├── index.ejs               # Store home page
+├── index.ts                # Featured products loader
+└── products/
+    ├── [id].ejs            # Product details view
+    └── [id].ts             # Product companion loader & metadata
+components/
+├── Navbar.ejs              # Reusable navigation bar
+└── ProductCard.ejs         # Reusable product card component
+nxpress.config.json         # Engine and global configuration
+```
+
+**Companion File (`app/products/[id].ts`):**
+```ts
+import type { Request, Response, NxpressMetadata } from '@nxpress/core';
+import config from '../../nxpress.config.json';
+
+// Dynamic SEO Metadata
+export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
+  const siteName = config.globals?.title || 'Nxpress Store';
+  return {
+    title: `${siteName} - Product #${req.params.id}`,
+    description: `Buy product #${req.params.id} at the best price.`,
+    openGraph: {
+      title: `Product #${req.params.id}`,
+      image: `/images/product-${req.params.id}.jpg`
+    }
+  };
+}
+
+// Page Data Loader
+export default async function props(req: Request, res: Response) {
+  const { id } = req.params;
+  const product = {
+    id,
+    name: `Premium Wireless Headset ${id}`,
+    price: 199.99,
+    features: ['Active Noise Cancelling', '40h Battery', 'Bluetooth 5.3']
+  };
+
+  const related = [
+    { id: '101', name: 'Protective Case', price: 29.99 },
+    { id: '102', name: 'Audio Cable', price: 14.99 }
+  ];
+
+  return { product, related };
+}
+```
+
+**View Template (`app/products/[id].ejs`):**
+```html
+<div class="container">
+  <h1><%= product.name %></h1>
+  <p class="price">$<%= product.price.toFixed(2) %></p>
+
+  <h3>Key Features:</h3>
+  <ul>
+    <% product.features.forEach(function(feat) { %>
+      <li><%= feat %></li>
+    <% }); %>
+  </ul>
+
+  <h2>Related Accessories</h2>
+  <div class="related-grid">
+    <% related.forEach(function(item) { %>
+      <ProductCard id="<%= item.id %>" name="<%= item.name %>" price="<%= item.price %>" />
+    <% }); %>
+  </div>
+</div>
+```
+
+---
+
+### 2. Multi-Language Blog with Static Export (SSG)
+
+**Project Structure:**
+```bash
+app/
+├── layout.ejs
+└── blog/
+    ├── [slug].ejs          # Blog post template with tr() helpers
+    └── [slug].ts           # generateStaticParams, props & metadata
+locales/
+├── en.json                 # English dictionary
+└── fr.json                 # French dictionary
+nxpress.config.json
+```
+
+**Static Generation & Loader (`app/blog/[slug].ts`):**
+```ts
+import type { Request, Response, NxpressMetadata } from '@nxpress/core';
+
+// List of slugs for static generation (nxpress export)
+export async function generateStaticParams() {
+  return [
+    { slug: 'announcing-nxpress-v1' },
+    { slug: 'file-based-routing-in-depth' }
+  ];
+}
+
+// SEO Metadata
+export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
+  return {
+    title: `Blog - ${req.params.slug}`,
+    description: `Read the full article on our blog.`
+  };
+}
+
+// Post Content
+export default async function props(req: Request, res: Response) {
+  const { slug } = req.params;
+  return {
+    slug,
+    title: slug.replace(/-/g, ' ').toUpperCase(),
+    readMinutes: 5,
+    authorName: 'Alex Rivers',
+    content: 'Nxpress provides an intuitive developer experience...'
+  };
+}
+```
+
+---
+
+### 3. Protected Admin Dashboard (Route Groups & Middleware Cascades)
+
+**Project Structure:**
+```bash
+app/
+├── (auth)/                 # URL: /login (parentheses omitted from URL)
+│   ├── login.ejs
+│   └── login.ts
+└── (dashboard)/            # URL: /overview, /analytics
+    ├── middleware.ts       # Runs on every route inside (dashboard)/
+    ├── layout.ejs          # Dashboard shell with sidebar
+    ├── overview.ejs
+    └── overview.ts
+```
+
+**Directory Middleware Guard (`app/(dashboard)/middleware.ts`):**
+```ts
+import type { Request, Response, NextFunction } from '@nxpress/core';
+
+export default function authGuard(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies?.session_token || req.headers['authorization'];
+
+  if (!token) {
+    return res.redirect('/login');
+  }
+
+  res.locals.user = { id: 1, name: 'Admin', role: 'admin' };
+  next();
+}
+```
+
+---
+
+### 4. Full REST API with Auto-Responses
+
+**Project Structure:**
+```bash
+app/
+└── api/
+    ├── middleware.ts       # Global API middleware
+    └── users/
+        ├── index.ts        # GET /api/users, POST /api/users
+        └── [id].ts         # GET /api/users/:id, PUT /api/users/:id, DELETE /api/users/:id
+```
+
+**Handlers (`app/api/users/index.ts`):**
+```ts
+import type { Request, Response } from '@nxpress/core';
+
+const users = [{ id: 1, name: 'Alice' }];
+
+// Automatic 200 OK JSON response
+export async function GET(req: Request, res: Response) {
+  return users;
+}
+
+// Explicit status response
+export async function POST(req: Request, res: Response) {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+  const newUser = { id: Date.now(), name };
+  users.push(newUser);
+  return res.status(201).json(newUser);
+}
+```
+
+
 
 
 
