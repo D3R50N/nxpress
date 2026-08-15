@@ -161,7 +161,7 @@ export async function metadata(req: Request, res: Response): Promise<NxpressMeta
 To use global configurations or constants in `metadata`, import them directly:
 
 ```ts
-import config from '../nxpress.config.json';
+import config from '@/nxpress.config.json';
 
 export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
   const siteTitle = config.globals?.title || 'My Store';
@@ -696,7 +696,7 @@ nxpress.config.json         # Engine and global configuration
 **Companion File (`app/products/[id].ts`):**
 ```ts
 import type { Request, Response, NxpressMetadata } from '@nxpress/core';
-import config from '../../nxpress.config.json';
+import config from '@/nxpress.config.json';
 
 // Dynamic SEO Metadata
 export async function metadata(req: Request, res: Response): Promise<NxpressMetadata> {
