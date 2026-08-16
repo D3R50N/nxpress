@@ -257,6 +257,18 @@ async function testExecuteMw() {
   assert.strictEqual(typeof findMethodHandler(apiModuleMixed, 'post'), 'function');
   assert.strictEqual(typeof findMethodHandler(apiModuleMixed, 'put'), 'function');
   assert.strictEqual(findMethodHandler(apiModuleMixed, 'delete'), undefined);
+
+  // Test scanRoutes
+  console.log('Testing scanRoutes & printRoutes...');
+  const { scanRoutes, printRoutes } = await import('../src/routes');
+  const scanned = scanRoutes({
+    rootDir: path.resolve(__dirname, 'fixtures')
+  });
+  assert.strictEqual(Array.isArray(scanned.apiRoutes), true);
+  assert.strictEqual(Array.isArray(scanned.pageRoutes), true);
+  assert.doesNotThrow(() => {
+    printRoutes({ rootDir: path.resolve(__dirname, 'fixtures') });
+  });
 }
 
 testExecuteMw().then(() => {

@@ -98,6 +98,7 @@ program
   });
 
 import { exportStatic } from "../export";
+import { printRoutes } from "../routes";
 
 program
   .command("export")
@@ -121,6 +122,23 @@ program
       componentsDir: cmdOptions.componentsDir,
       publicDir: cmdOptions.publicDir,
       tailwind: cmdOptions.tailwind,
+    });
+  });
+
+program
+  .command("routes")
+  .description("Display all generated application and API routes")
+  .option("-a, --app-dir <dir>", "Custom app directory")
+  .option("-r, --root-dir <dir>", "Custom root directory")
+  .option("-e, --engine <engine>", "Template engine (hbs, ejs, html, nunjucks, liquid)")
+  .action((cmdOptions) => {
+    const rootDir = cmdOptions.rootDir
+      ? path.resolve(cmdOptions.rootDir)
+      : process.cwd();
+    printRoutes({
+      rootDir,
+      appDir: cmdOptions.appDir,
+      engine: cmdOptions.engine,
     });
   });
 

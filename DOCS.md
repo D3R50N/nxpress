@@ -44,9 +44,10 @@ pnpm create nxpress-app my-api -y --api
 
 You can start your Nxpress application in two ways:
 
-1. **Via Nxpress CLI (`nxpress dev` / `nxp dev` / `nxpress export`)**:
+1. **Via Nxpress CLI (`nxpress dev` / `nxp dev` / `nxpress export` / `nxpress routes`)**:
    - `nxpress dev`: Starts the development server with Hot Reload, live route re-scanning, and Tailwind compilation.
    - `nxpress start`: Starts the production server.
+   - `nxpress routes`: Displays all generated application and API routes in a clear, formatted terminal table.
    - `nxpress export`: Generates a static HTML export (SSG) of all routes and assets to `out/`.
 
 2. **Via custom `server.ts` file (`npx tsx --watch server.ts` / `pnpm serve`)**:

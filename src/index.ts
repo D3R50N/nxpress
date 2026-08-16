@@ -18,6 +18,14 @@ export {
   detectLocale,
 } from "./i18n";
 export { exportStatic, NxpressExportOptions, ExportResult } from "./export";
+export {
+  scanRoutes,
+  printRoutes,
+  ScanRoutesOptions,
+  ScannedRoutes,
+  ApiRouteInfo,
+  PageRouteInfo,
+} from "./routes";
 
 
 
