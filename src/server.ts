@@ -9,7 +9,7 @@ import { builtinHelpers, registerBuiltinHelpers } from "./helpers";
 import { registerRoutes, registerErrorHandlers } from "./router";
 import { loadConfigFile } from "./config";
 
-import { logger } from "./logger";
+import { logger, createDevHttpLogger } from "./logger";
 import {
   compileTailwindCss,
   getTailwindOutputInfo,
@@ -110,6 +110,10 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  if (isDevMode(options)) {
+    app.use(createDevHttpLogger());
+  }
 
   // i18n localization middleware
   let i18nConfig = options.i18n || fileConfig.i18n;
