@@ -397,12 +397,14 @@ export async function GET(req: Request, res: Response) {
 export async function POST(req: Request, res: Response) {
   const { name, email } = req.body;
   if (!name || !email) {
-    return res.status(400).json({ error: 'Name and email are required' });
+    res.status(400);
+    return { error: 'Name and email are required' };
   }
 
   const newUser = { id: Date.now(), name, email };
   mockUsers.push(newUser);
-  return res.status(201).json(newUser);
+  res.status(201);
+  return newUser;
 }
 ```
 
@@ -417,7 +419,8 @@ export async function GET(req: Request, res: Response) {
   const user = mockUsers.find(u => u.id === userId);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    res.status(404);
+    return { error: 'User not found' };
   }
   return user;
 }
@@ -429,7 +432,8 @@ export async function PUT(req: Request, res: Response) {
   const user = mockUsers.find(u => u.id === userId);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    res.status(404);
+    return { error: 'User not found' };
   }
   user.name = name ?? user.name;
   user.email = email ?? user.email;
