@@ -14,23 +14,28 @@ function logDeduplicated(key: string, printNew: () => void) {
 }
 
 export function formatMethod(method: string): string {
-  switch (method.toUpperCase()) {
+  const upper = method.toUpperCase();
+  switch (upper) {
     case "GET":
-      return chalk.cyan.bold("GET");
+      return chalk.blue.bold(upper);
     case "POST":
-      return chalk.green.bold("POST");
+      return chalk.green.bold(upper);
     case "PUT":
-      return chalk.yellow.bold("PUT");
-    case "DELETE":
-      return chalk.red.bold("DELETE");
+      return chalk.hex("#FFA500").bold(upper);
     case "PATCH":
-      return chalk.magenta.bold("PATCH");
+      return chalk.hex("#0D9488").bold(upper);
+    case "DELETE":
+      return chalk.red.bold(upper);
     case "HEAD":
-      return chalk.blue.bold("HEAD");
+      return chalk.gray.bold(upper);
     case "OPTIONS":
-      return chalk.gray.bold("OPTIONS");
+      return chalk.gray.bold(upper);
+    case "TRACE":
+      return chalk.dim.bold(upper);
+    case "CONNECT":
+      return chalk.dim.bold(upper);
     default:
-      return chalk.bold(method.toUpperCase());
+      return chalk.bold(upper);
   }
 }
 
@@ -56,7 +61,7 @@ export function createDevHttpLogger() {
     const start = Date.now();
     res.on("finish", () => {
       const duration = Date.now() - start;
-      const method = chalk.magenta.bold(`[${(req.method || "GET").toUpperCase()}]`);
+      const method = formatMethod(req.method || "GET");
       const route = req.originalUrl || req.url;
       const status = formatStatus(res.statusCode || 200);
       const time = chalk.cyan(`${duration}ms`);
