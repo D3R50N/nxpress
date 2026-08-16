@@ -8,6 +8,38 @@ This document details all features, configuration options, template objects, hel
 
 `@nxpress/core` is an Express.js-based framework for Node.js providing file-based routing, template components, cascading middlewares, automatic response handling, and built-in template helpers.
 
+### Project Scaffolding (`create-nxpress-app`)
+
+Quickly scaffold a new Nxpress project interactively or with flags:
+
+```bash
+# Interactive setup
+npx create-nxpress-app my-app
+# or
+pnpm create nxpress-app my-app
+
+# Automatic setup with defaults (-y / --yes)
+pnpm create nxpress-app my-app -y
+
+# Scaffold API-only project without template views (--api)
+pnpm create nxpress-app my-api -y --api
+```
+
+#### CLI Options
+
+| Flag | Description | Default |
+| :--- | :--- | :--- |
+| `-y, --yes` | Skip prompts and use default configuration | `false` |
+| `--api` | Create an API-only project (no views/components, preconfigures `users` & `health` APIs) | `false` |
+| `-e, --engine <engine>` | Template engine (`ejs`, `handlebars`, `nunjucks`, `liquid`, `html`) | `"ejs"` |
+| `-p, --port <number>` | Server port number | `3000` |
+| `--tailwind` | Include Tailwind CSS support | `true` |
+| `-m, --minimal` | Create a minimal project without views or components | `false` |
+| `--app-dir <dir>` | Custom routes directory name | `"app"` |
+| `--components-dir <dir>` | Custom components directory name | `"components"` |
+| `--public-dir <dir>` | Custom public assets directory name | `"public"` |
+| `--pkg-manager <pm>` | Package manager (`pnpm`, `npm`, `yarn`, `bun`, `deno`) | `"pnpm"` |
+
 ### Starting the Server
 
 You can start your Nxpress application in two ways:
