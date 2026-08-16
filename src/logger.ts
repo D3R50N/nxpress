@@ -59,7 +59,7 @@ export function createDevHttpLogger() {
       const method = chalk.magenta.bold(`[${(req.method || "GET").toUpperCase()}]`);
       const route = req.originalUrl || req.url;
       const status = formatStatus(res.statusCode || 200);
-      const time = chalk.blue(`${duration}ms`);
+      const time = chalk.cyan(`${duration}ms`);
       console.log(`${method} ${route} ${status} in ${time}`);
     });
     next();
