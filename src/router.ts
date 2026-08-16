@@ -602,7 +602,10 @@ export async function renderPageView(
         typeof dataModule.default.metadata === "function"
       ) {
         metaFn = dataModule.default.metadata;
-      } else if (dataModule.metadata && typeof dataModule.metadata === "object") {
+      } else if (
+        dataModule.metadata &&
+        typeof dataModule.metadata === "object"
+      ) {
         rawMetadata = { ...dataModule.metadata };
       } else if (
         dataModule.default?.metadata &&
@@ -635,9 +638,7 @@ export async function renderPageView(
   }
 
   const tailwindCssUrl =
-    res.locals._tailwindCssUrl ||
-    res.locals.tailwindCssUrl ||
-    "/tailwind.css";
+    res.locals._tailwindCssUrl || res.locals.tailwindCssUrl || "/tailwind.css";
   delete res.locals._tailwindCssUrl;
   delete res.locals.tailwindCssUrl;
 
@@ -691,8 +692,8 @@ export async function renderPageView(
       if (isDevMode(options)) {
         res.status(500).send(formatDev500ErrorHtml(err));
       } else {
-         let html500 = getInjection("500.html");
-          res.status(500).send(html500);
+        let html500 = getInjection("500.html");
+        res.status(500).send(html500);
       }
     }
   }
@@ -754,13 +755,27 @@ export function registerRoutes(
       routeModule = require(fullPath);
     }
 
-    const folderMws = getFolderMiddlewares(appDir, file, routePath, options.rootDir);
-    const routeMwWrapper = createRouteMiddlewareWrapper(fullPath, options.rootDir);
+    const folderMws = getFolderMiddlewares(
+      appDir,
+      file,
+      routePath,
+      options.rootDir,
+    );
+    const routeMwWrapper = createRouteMiddlewareWrapper(
+      fullPath,
+      options.rootDir,
+    );
     const allMiddlewares = [...folderMws, routeMwWrapper];
 
-    const methods: Array<
-      "get" | "post" | "put" | "delete" | "patch" | "head" | "options"
-    > = ["get", "post", "put", "delete", "patch", "head", "options"];
+    const methods: Array<HttpMethod> = [
+      "get",
+      "post",
+      "put",
+      "delete",
+      "patch",
+      "head",
+      "options",
+    ];
     let registered = false;
 
     methods.forEach((method) => {
@@ -867,10 +882,17 @@ export function registerRoutes(
       companionPath = companionJsFile;
     }
 
-    const folderMws = getFolderMiddlewares(appDir, templateFile, routePath, options.rootDir);
+    const folderMws = getFolderMiddlewares(
+      appDir,
+      templateFile,
+      routePath,
+      options.rootDir,
+    );
     const allMiddlewares = [...folderMws];
     if (companionPath) {
-      allMiddlewares.push(createRouteMiddlewareWrapper(companionPath, options.rootDir));
+      allMiddlewares.push(
+        createRouteMiddlewareWrapper(companionPath, options.rootDir),
+      );
     }
 
     const handler: RequestHandler = async (req: Request, res: Response) => {
