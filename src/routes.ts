@@ -173,11 +173,11 @@ export function printRoutes(options: ScanRoutesOptions = {}): void {
     for (const r of apiRoutes) {
       const rawMethods = r.methods.join(" ");
       const formattedMethods = r.methods.map((m) => formatMethod(m)).join(" ");
+      const pathCol =
+        chalk.bold(r.path) + " ".repeat(Math.max(1, 30 - r.path.length));
       const methodCol =
         formattedMethods + " ".repeat(Math.max(1, 26 - rawMethods.length));
-      const pathCol =
-        chalk.bold(r.path) + " ".repeat(Math.max(1, 28 - r.path.length));
-      console.log(`    ${methodCol} ${pathCol} ${chalk.dim(r.file)}`);
+      console.log(`    ${pathCol} ${methodCol} ${chalk.dim(r.file)}`);
     }
     console.log();
   }
@@ -188,19 +188,12 @@ export function printRoutes(options: ScanRoutesOptions = {}): void {
     for (const r of pageRoutes) {
       const rawMethod = r.method;
       const formattedMethod = formatMethod(r.method);
+      const pathCol =
+        chalk.bold(r.path) + " ".repeat(Math.max(1, 30 - r.path.length));
       const methodCol =
         formattedMethod + " ".repeat(Math.max(1, 26 - rawMethod.length));
-      const pathCol =
-        chalk.bold(r.path) + " ".repeat(Math.max(1, 28 - r.path.length));
-      console.log(`    ${methodCol} ${pathCol} ${chalk.dim(r.file)}`);
+      console.log(`    ${pathCol} ${methodCol} ${chalk.dim(r.file)}`);
     }
     console.log();
   }
-
-  console.log(
-    chalk.dim(
-      `  Total: ${total} route${total > 1 ? "s" : ""} (${apiRoutes.length} API, ${pageRoutes.length} Page${pageRoutes.length > 1 ? "s" : ""})`,
-    ),
-  );
-  console.log();
 }
