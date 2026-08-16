@@ -56,11 +56,11 @@ export function createDevHttpLogger() {
     const start = Date.now();
     res.on("finish", () => {
       const duration = Date.now() - start;
-      const method = formatMethod(req.method || "GET");
+      const method = chalk.magenta.bold(`[${(req.method || "GET").toUpperCase()}]`);
+      const route = req.originalUrl || req.url;
       const status = formatStatus(res.statusCode || 200);
-      const url = chalk.white(req.originalUrl || req.url);
-      const time = formatDuration(duration);
-      console.log(`${PREFIX} ${method} ${url} - ${status} (${time})`);
+      const time = chalk.blue(`${duration}ms`);
+      console.log(`${method} ${route} ${status} in ${time}`);
     });
     next();
   };
