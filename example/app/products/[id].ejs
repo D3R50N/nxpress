@@ -16,7 +16,8 @@
               <%= product.category %>
             </span>
             <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
-              ★ <%= product.rating %> / 5.0
+              <%- I('star', 'w-3.5 h-3.5 fill-amber-400 text-amber-400') %>
+              <span><%= product.rating %> / 5.0</span>
             </div>
           </div>
           <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
@@ -32,8 +33,9 @@
           <div class="text-3xl font-black text-slate-900 dark:text-white">
             <%= product.price %> <%= G.currency %>
           </div>
-          <div class="mt-2 text-xs font-semibold <%= product.stock > 10 ? 'text-emerald-500' : 'text-amber-500' %>">
-            ● <%= product.stock %> <%= tr('units_available') %>
+          <div class="mt-2 text-xs font-semibold flex items-center justify-start md:justify-end gap-1.5 <%= product.stock > 10 ? 'text-emerald-500' : 'text-amber-500' %>">
+            <span class="w-2 h-2 rounded-full bg-current"></span>
+            <span><%= product.stock %> <%= tr('units_available') %></span>
           </div>
           <button onclick="alert('Commande validée pour : <%= product.name %>')" class="mt-6 w-full py-3 px-4 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-md shadow-sky-500/20">
             Acheter maintenant &rarr;
@@ -62,7 +64,9 @@
 
   <% } else { %>
     <div class="p-12 text-center bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-800">
-      <div class="text-4xl mb-3">⚠️</div>
+      <div class="flex justify-center mb-3 text-amber-500">
+        <%- I('alert-triangle', 'w-10 h-10') %>
+      </div>
       <h2 class="text-xl font-bold text-slate-900 dark:text-white">Produit non trouvé</h2>
       <p class="text-xs text-slate-400 mt-2">Le produit demandé n'existe pas dans la base de démonstration.</p>
       <a href="/products" class="inline-block mt-6 px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white">

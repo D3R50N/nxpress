@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { NxpressMetadata } from '../../../src';
+import type { NxpressMetadata } from '../../src';
 
 export function metadata(req: Request, res: Response): NxpressMetadata {
   return {

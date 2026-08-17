@@ -28,7 +28,9 @@
   <!-- Features Highlight -->
   <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
-      <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg mb-4">📁</div>
+      <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-4">
+        <%- I('folder-tree', 'w-5 h-5') %>
+      </div>
       <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">File-Based Routing</h3>
       <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
         Pages SSR et endpoints API créés automatiquement à partir de votre arborescence <code>app/</code>.
@@ -36,7 +38,9 @@
     </div>
 
     <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
-      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+        <%- I('shield-check', 'w-5 h-5') %>
+      </div>
       <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Cascading Middleware</h3>
       <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
         Middlewares hérités hiérarchiquement par dossier pour protéger facilement vos sections comme <code>/dashboard</code>.
@@ -44,7 +48,9 @@
     </div>
 
     <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
-      <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg mb-4">🌍</div>
+      <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+        <%- I('globe', 'w-5 h-5') %>
+      </div>
       <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Built-in i18n & Theme</h3>
       <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
         Support multilingue instantané avec <code>tr()</code> et gestion de thème sombre/clair sans configuration.

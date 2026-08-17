@@ -7,7 +7,7 @@ import nunjucks from "nunjucks";
 import { Liquid } from "liquidjs";
 import { logger } from "./logger";
 import { getFilesPattern } from "./router";
-import { ejsToEta } from "./helpers";
+import { builtinHelpers, ejsToEta } from "./helpers";
 import { isDevMode } from "./env";
 
 const etaEngine = new Eta({
@@ -44,7 +44,7 @@ export function renderComponent(
     registerComponents(lastComponentsDir, lastComponentOptions);
   }
 
-  const mergedProps = { ...locals, ...props };
+  const mergedProps = { ...builtinHelpers, ...locals, ...props };
   const lowerName = name.toLowerCase();
   const comp = componentRegistry.get(lowerName);
 

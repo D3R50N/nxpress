@@ -5,7 +5,8 @@
         <%= product.category %>
       </span>
       <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
-        ★ <span><%= product.rating || '5.0' %></span>
+        <%- I('star', 'w-3.5 h-3.5 fill-amber-400 text-amber-400') %>
+        <span><%= product.rating || '5.0' %></span>
       </div>
     </div>
 
