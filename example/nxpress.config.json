@@ -10,9 +10,9 @@
     "defaultLocale": "en"
   },
   "globals": {
-    "siteName": "Nxpress Store",
-    "author": "Nxpress Team",
+    "siteName": "Homedine",
+    "author": "Homedine Organics",
     "version": "1.0.0",
-    "currency": "€"
+    "currency": "$"
   }
 }

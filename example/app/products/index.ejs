@@ -1,46 +1,62 @@
-<div class="space-y-8">
+<div class="space-y-10">
   <!-- Header -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#ece7df] dark:border-[#222b27]">
     <div>
-      <h1 class="text-3xl font-black text-slate-900 dark:text-white">
-        <%= tr('products') %>
+      <span class="text-xs font-semibold text-[#667a71] dark:text-[#8ea399] tracking-wider uppercase block mb-1">
+        <%= tr('hero_tag') %>
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[#1a2e28] dark:text-white">
+        All <span class="font-serif-italic font-normal text-[#2c6153] dark:text-[#64bfa9]"><%= tr('products') %></span>
       </h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+      <p class="text-xs text-[#667a71] dark:text-[#8ea399] mt-1">
         <%= totalCount %> <%= tr('units_available') %>
       </p>
     </div>
 
     <!-- Search & Filter Form -->
     <form method="GET" action="/products" class="flex flex-wrap items-center gap-3">
-      <input type="text" name="search" value="<%= searchQuery %>" placeholder="<%= tr('search_placeholder') %>"
-        class="px-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 w-64 shadow-sm" />
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7c8d86]">
+          <%- I('search', 'w-3.5 h-3.5') %>
+        </div>
+        <input type="text" name="search" value="<%= searchQuery %>" placeholder="<%= tr('search_placeholder') %>"
+          class="pl-9 pr-4 py-2 text-xs rounded-full bg-[#f1ece1] dark:bg-[#1d2522] border-none text-[#23352f] dark:text-[#e4ebe7] focus:outline-none focus:ring-1 focus:ring-[#2c6153] w-56" />
+      </div>
 
       <select name="category" onchange="this.form.submit()"
-        class="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 shadow-sm cursor-pointer">
-        <option value="" <%= selectedCategory === 'all' ? 'selected' : '' %>><%= tr('all_categories') %></option>
+        class="px-4 py-2 text-xs rounded-full bg-[#f1ece1] dark:bg-[#1d2522] border-none text-[#23352f] dark:text-[#e4ebe7] focus:outline-none focus:ring-1 focus:ring-[#2c6153] cursor-pointer">
+        <option value="" <%= selectedCategory === 'all' ? 'selected' : '' %>>All Categories</option>
         <% categories.forEach(function(cat) { %>
           <option value="<%= cat %>" <%= selectedCategory.toLowerCase() === cat.toLowerCase() ? 'selected' : '' %>><%= cat %></option>
         <% }); %>
       </select>
-
-      <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-sm">
-        Filter
-      </button>
     </form>
+  </div>
+
+  <!-- Category Pills -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-2">
+    <a href="/products" class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors <%= selectedCategory === 'all' ? 'bg-[#1b362f] text-white dark:bg-[#2e5e52]' : 'bg-[#f1ece1] dark:bg-[#1d2522] text-[#4f6158] dark:text-[#a2b5ac] hover:bg-[#e4ddcf]' %>">
+      All Items
+    </a>
+    <% categories.forEach(function(cat) { %>
+      <a href="/products?category=<%= encodeURIComponent(cat) %>" class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors <%= selectedCategory.toLowerCase() === cat.toLowerCase() ? 'bg-[#1b362f] text-white dark:bg-[#2e5e52]' : 'bg-[#f1ece1] dark:bg-[#1d2522] text-[#4f6158] dark:text-[#a2b5ac] hover:bg-[#e4ddcf]' %>">
+        <%= cat %>
+      </a>
+    <% }); %>
   </div>
 
   <!-- Products Grid -->
   <% if (products.length === 0) { %>
-    <div class="text-center py-16 bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-800">
-      <div class="flex justify-center mb-3 text-slate-400">
+    <div class="text-center py-20 bg-[#f4efe6] dark:bg-[#18221e] rounded-3xl border border-[#e8e2d4] dark:border-[#26352f]">
+      <div class="flex justify-center mb-3 text-[#7a8c84]">
         <%- I('search', 'w-10 h-10') %>
       </div>
-      <h3 class="text-base font-bold text-slate-900 dark:text-white">No products found</h3>
-      <p class="text-xs text-slate-400 mt-1">Try refining your search terms or category filter.</p>
-      <a href="/products" class="inline-block mt-4 text-xs font-bold text-sky-500 hover:underline">Reset Filters</a>
+      <h3 class="text-base font-bold text-[#1a2e28] dark:text-white">No products found</h3>
+      <p class="text-xs text-[#7a8c84] mt-1">Try another category or search term.</p>
+      <a href="/products" class="inline-block mt-4 px-4 py-2 rounded-full text-xs font-bold bg-[#1b362f] text-white">Reset Filters</a>
     </div>
   <% } else { %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <% products.forEach(function(product) { %>
         <%- $('ProductCard', { product: product }) %>
       <% }); %>

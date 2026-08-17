@@ -1,35 +1,49 @@
-<div class="group bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+<div class="group bg-white dark:bg-[#18201d] rounded-2xl p-4 border border-[#eee8dc] dark:border-[#26332d] hover:border-[#274c43]/40 dark:hover:border-[#52aa95]/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between">
   <div>
-    <div class="flex items-center justify-between gap-2 mb-3">
-      <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/60 dark:border-sky-800/40">
-        <%= product.category %>
-      </span>
-      <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
-        <%- I('star', 'w-3.5 h-3.5 fill-amber-400 text-amber-400') %>
-        <span><%= product.rating || '5.0' %></span>
-      </div>
+    <!-- Image Box with Badge -->
+    <div class="relative w-full aspect-square rounded-xl bg-[#f2eee6] dark:bg-[#1f2a25] overflow-hidden mb-4 flex items-center justify-center p-3">
+      <% if (product.badge) { %>
+        <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-medium tracking-wide bg-white/90 dark:bg-[#121615]/90 backdrop-blur text-[#3d524a] dark:text-[#c4d6cf] border border-[#e5ded0]/80 dark:border-[#2f3f38] shadow-sm">
+          <%= product.badge %>
+        </span>
+      <% } %>
+      
+      <img src="<%= product.image || 'https://images.unsplash.com/photo-1584990347449-35c824c9657f?w=600&auto=format&fit=crop&q=80' %>" 
+           alt="<%= product.name %>" 
+           class="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-500" 
+           loading="lazy" />
     </div>
 
-    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-500 dark:group-hover:text-sky-400 transition-colors mb-2">
+    <!-- Color Swatches -->
+    <div class="flex items-center gap-1.5 mb-3">
+      <% if (product.colors && product.colors.length > 0) { %>
+        <% product.colors.forEach(function(c) { %>
+          <span class="w-2.5 h-2.5 rounded-full border border-black/10 dark:border-white/20" style="background-color: <%= c %>;"></span>
+        <% }); %>
+      <% } else { %>
+        <span class="w-2.5 h-2.5 rounded-full bg-[#6fa89c]"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-[#9dbcb5]"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-[#3a574f]"></span>
+      <% } %>
+    </div>
+
+    <!-- Product Title -->
+    <h3 class="text-sm font-semibold text-[#1c2924] dark:text-[#edf5f1] group-hover:text-[#2c6153] dark:group-hover:text-[#64bfa9] transition-colors leading-snug mb-3">
       <a href="/products/<%= product.id %>">
         <%= product.name %>
       </a>
     </h3>
-
-    <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
-      <%= product.description %>
-    </p>
   </div>
 
-  <div class="pt-4 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
-    <div>
-      <span class="text-xs text-slate-400 block"><%= typeof tr === 'function' ? tr('price') : 'Price' %></span>
-      <span class="text-lg font-extrabold text-slate-900 dark:text-white">
-        <%= product.price %> <%= typeof G !== 'undefined' && G.currency ? G.currency : '€' %>
-      </span>
+  <!-- Price & Cart Button -->
+  <div class="flex items-center justify-between pt-2">
+    <div class="text-base font-extrabold text-[#1a2b25] dark:text-white">
+      <%= typeof G !== 'undefined' && G.currency ? G.currency : '$' %><%= product.price.toFixed ? product.price.toFixed(2) : product.price %>
     </div>
-    <a href="/products/<%= product.id %>" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-sky-500 dark:bg-slate-700 hover:text-white dark:hover:bg-sky-500 text-slate-700 dark:text-slate-200 transition-colors">
-      <%= typeof tr === 'function' ? tr('view_details') : 'View Details' %> &rarr;
-    </a>
+    
+    <button onclick="window.location.href='/products/<%= product.id %>'" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#1b362f] hover:bg-[#284f45] dark:bg-[#2e5e52] dark:hover:bg-[#3d7a6b] text-white transition-colors shadow-sm">
+      <%- I('plus', 'w-3 h-3') %>
+      <span><%= typeof tr === 'function' ? tr('add_to_cart') : 'Cart' %></span>
+    </button>
   </div>
 </div>

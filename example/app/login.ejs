@@ -1,44 +1,44 @@
-<div class="max-w-md mx-auto my-10">
-  <div class="bg-white dark:bg-slate-800/90 rounded-3xl p-8 border border-slate-200/80 dark:border-slate-700/60 shadow-xl">
+<div class="max-w-md mx-auto my-12">
+  <div class="bg-white dark:bg-[#18201d] rounded-3xl p-8 sm:p-10 border border-[#eee8dc] dark:border-[#26332d] shadow-lg">
     <div class="text-center mb-8">
-      <div class="inline-flex p-3 rounded-2xl bg-sky-500/10 text-sky-500 mb-3">
+      <div class="inline-flex p-3 rounded-full bg-[#f1ece1] dark:bg-[#202b26] text-[#2c6153] dark:text-[#64bfa9] mb-3">
         <%- I('lock', 'w-6 h-6') %>
       </div>
-      <h1 class="text-2xl font-black text-slate-900 dark:text-white">
+      <h1 class="text-2xl font-bold text-[#1a2e28] dark:text-white">
         <%= tr('login') %>
       </h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+      <p class="text-xs text-[#6e8078] dark:text-[#8ea39b] mt-2">
         <%= tr('login_description') %>
       </p>
     </div>
 
     <% if (hasError) { %>
-      <div class="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/50 text-rose-600 dark:text-rose-400 text-xs">
-        <strong>Accès restreint :</strong> Veuillez vous connecter pour accéder à cette page.
+      <div class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 text-rose-600 dark:text-rose-400 text-xs">
+        <strong>Accès requis :</strong> Veuillez vous connecter pour accéder au tableau de bord.
       </div>
     <% } %>
 
     <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
       <div>
-        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+        <label class="block text-xs font-semibold text-[#44544e] dark:text-[#b0c2b9] mb-1">Email</label>
         <input type="email" id="email" value="admin@nxpress.dev" required
-          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-sky-500" />
+          class="w-full px-4 py-2.5 rounded-full border border-[#e4ded2] dark:border-[#2c3d35] bg-[#faf8f4] dark:bg-[#151c19] text-[#1a2b25] dark:text-[#e4ebe7] text-xs focus:outline-none focus:ring-1 focus:ring-[#2c6153]" />
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+        <label class="block text-xs font-semibold text-[#44544e] dark:text-[#b0c2b9] mb-1">Password</label>
         <input type="password" id="password" value="password123" required
-          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-sky-500" />
+          class="w-full px-4 py-2.5 rounded-full border border-[#e4ded2] dark:border-[#2c3d35] bg-[#faf8f4] dark:bg-[#151c19] text-[#1a2b25] dark:text-[#e4ebe7] text-xs focus:outline-none focus:ring-1 focus:ring-[#2c6153]" />
       </div>
 
       <button type="submit" id="submitBtn"
-        class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-md shadow-sky-500/20">
+        class="w-full py-3 px-4 rounded-full font-bold text-xs bg-[#1b362f] hover:bg-[#284f45] dark:bg-[#2e5e52] text-white transition-all shadow-md">
         Se connecter &rarr;
       </button>
     </form>
 
-    <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/60 text-center text-xs text-slate-400">
-      Compte de test : <code>admin@nxpress.dev</code> / <code>user@nxpress.dev</code>
+    <div class="mt-6 pt-6 border-t border-[#eee8dc] dark:border-[#26332d] text-center text-xs text-[#8c9e96]">
+      Compte de test : <code>admin@nxpress.dev</code> / <code>password123</code>
     </div>
   </div>
 </div>
@@ -48,7 +48,7 @@ async function handleLogin(e) {
   e.preventDefault();
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.innerText = 'Connexion en cours...';
+  btn.innerText = 'Connexion...';
 
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -62,11 +62,10 @@ async function handleLogin(e) {
 
     const data = await res.json();
     if (data.success) {
-      // Set session cookie
       document.cookie = 'nxpress_user=' + encodeURIComponent(JSON.stringify(data.user)) + '; path=/; max-age=86400';
       window.location.href = '<%= redirectUrl %>';
     } else {
-      alert(data.error || 'Erreur de connexion');
+      alert(data.error || 'Erreur');
       btn.disabled = false;
       btn.innerText = 'Se connecter →';
     }

@@ -1,59 +1,84 @@
-<div class="space-y-10">
+<div class="space-y-12">
   <!-- Back Link -->
   <div>
-    <a href="/products" class="inline-flex items-center gap-2 text-xs font-semibold text-sky-500 hover:text-sky-600 transition-colors">
+    <a href="/products" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2c6153] dark:text-[#64bfa9] hover:underline">
       &larr; <%= tr('back_to_products') %>
     </a>
   </div>
 
   <% if (product) { %>
     <!-- Product Detail Card -->
-    <div class="bg-white dark:bg-slate-800/90 rounded-3xl p-8 md:p-10 border border-slate-200/80 dark:border-slate-700/60 shadow-lg">
-      <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-8 border-b border-slate-100 dark:border-slate-700/60">
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/50">
-              <%= product.category %>
-            </span>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-10 bg-white dark:bg-[#18201d] rounded-3xl p-6 sm:p-10 border border-[#eee8dc] dark:border-[#26332d] shadow-sm items-center">
+      
+      <!-- Product Image Box -->
+      <div class="md:col-span-6 rounded-2xl overflow-hidden aspect-square bg-[#f2eee6] dark:bg-[#1f2a25] flex items-center justify-center p-4">
+        <img src="<%= product.image || 'https://images.unsplash.com/photo-1584990347449-35c824c9657f?w=800&auto=format&fit=crop&q=80' %>" 
+             alt="<%= product.name %>" 
+             class="w-full h-full object-cover rounded-xl" />
+      </div>
+
+      <!-- Product Info -->
+      <div class="md:col-span-6 space-y-6">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <% if (product.badge) { %>
+              <span class="px-3 py-1 rounded-full text-xs font-medium bg-[#f1ece1] dark:bg-[#1f2a25] text-[#3d524a] dark:text-[#c4d6cf]">
+                <%= product.badge %>
+              </span>
+            <% } %>
             <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
               <%- I('star', 'w-3.5 h-3.5 fill-amber-400 text-amber-400') %>
               <span><%= product.rating %> / 5.0</span>
             </div>
           </div>
-          <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
+
+          <h1 class="text-3xl sm:text-4xl font-bold text-[#1a2e28] dark:text-white leading-tight">
             <%= product.name %>
           </h1>
-          <p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-            <%= product.description %>
-          </p>
+
+          <div class="mt-4 text-3xl font-extrabold text-[#1a2b25] dark:text-[#64bfa9]">
+            <%= typeof G !== 'undefined' && G.currency ? G.currency : '$' %><%= product.price.toFixed ? product.price.toFixed(2) : product.price %>
+          </div>
         </div>
 
-        <div class="text-left md:text-right bg-slate-50 dark:bg-slate-900/60 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 min-w-[220px]">
-          <div class="text-xs text-slate-400 mb-1"><%= tr('price') %></div>
-          <div class="text-3xl font-black text-slate-900 dark:text-white">
-            <%= product.price %> <%= G.currency %>
+        <p class="text-sm text-[#5c6e66] dark:text-[#a0b3aa] leading-relaxed">
+          <%= product.description %>
+        </p>
+
+        <!-- Color Selection -->
+        <div class="space-y-2">
+          <span class="text-xs font-semibold text-[#7a8c84] uppercase tracking-wider block">Available Colors</span>
+          <div class="flex items-center gap-2">
+            <% if (product.colors && product.colors.length > 0) { %>
+              <% product.colors.forEach(function(c) { %>
+                <button class="w-6 h-6 rounded-full border-2 border-white dark:border-black shadow-sm ring-1 ring-black/10" style="background-color: <%= c %>;"></button>
+              <% }); %>
+            <% } else { %>
+              <span class="w-6 h-6 rounded-full bg-[#6fa89c]"></span>
+              <span class="w-6 h-6 rounded-full bg-[#9dbcb5]"></span>
+              <span class="w-6 h-6 rounded-full bg-[#3a574f]"></span>
+            <% } %>
           </div>
-          <div class="mt-2 text-xs font-semibold flex items-center justify-start md:justify-end gap-1.5 <%= product.stock > 10 ? 'text-emerald-500' : 'text-amber-500' %>">
-            <span class="w-2 h-2 rounded-full bg-current"></span>
-            <span><%= product.stock %> <%= tr('units_available') %></span>
-          </div>
-          <button onclick="alert('Commande validée pour : <%= product.name %>')" class="mt-6 w-full py-3 px-4 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-md shadow-sky-500/20">
-            Acheter maintenant &rarr;
+        </div>
+
+        <div class="pt-4 border-t border-[#eee8dc] dark:border-[#26332d] flex items-center gap-4">
+          <button onclick="alert('Added to cart: <%= product.name %>')" class="flex-1 py-3.5 px-6 rounded-full text-xs font-bold bg-[#1b362f] hover:bg-[#284f45] dark:bg-[#2e5e52] text-white transition-all shadow-md">
+            Add to Cart &rarr;
           </button>
+          <div class="text-xs font-medium text-[#7a8c84]">
+            <%= product.stock %> <%= tr('units_available') %>
+          </div>
         </div>
       </div>
 
-      <!-- Live API Info -->
-      <div class="pt-6 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-4">
-        <div>Endpoint API : <code class="text-sky-500">/api/products/<%= product.id %></code></div>
-        <div>SSR Param : <code>id = <%= product.id %></code></div>
-      </div>
     </div>
 
     <!-- Related Products -->
     <% if (related && related.length > 0) { %>
-      <div class="space-y-6 pt-4">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Produits similaires</h2>
+      <div class="space-y-6 pt-6">
+        <h2 class="text-2xl font-bold text-[#1a2e28] dark:text-white">
+          Related <span class="font-serif-italic font-normal text-[#2c6153] dark:text-[#64bfa9]">Products</span>
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <% related.forEach(function(item) { %>
             <%- $('ProductCard', { product: item }) %>
@@ -63,13 +88,13 @@
     <% } %>
 
   <% } else { %>
-    <div class="p-12 text-center bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-800">
+    <div class="p-16 text-center bg-[#f4efe6] dark:bg-[#18221e] rounded-3xl border border-[#e8e2d4] dark:border-[#26352f]">
       <div class="flex justify-center mb-3 text-amber-500">
         <%- I('alert-triangle', 'w-10 h-10') %>
       </div>
-      <h2 class="text-xl font-bold text-slate-900 dark:text-white">Produit non trouvé</h2>
-      <p class="text-xs text-slate-400 mt-2">Le produit demandé n'existe pas dans la base de démonstration.</p>
-      <a href="/products" class="inline-block mt-6 px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white">
+      <h2 class="text-xl font-bold text-[#1a2e28] dark:text-white">Product Not Found</h2>
+      <p class="text-xs text-[#7a8c84] mt-2">The requested product could not be found.</p>
+      <a href="/products" class="inline-block mt-6 px-5 py-2.5 rounded-full text-xs font-bold bg-[#1b362f] text-white">
         <%= tr('back_to_products') %>
       </a>
     </div>

@@ -1,46 +1,57 @@
-<header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur border-b border-slate-200 dark:border-slate-700/60 sticky top-0 z-50 transition-colors">
-  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="/" class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 tracking-tight hover:opacity-90">
-      <span class="p-1.5 rounded-lg bg-sky-500 text-white flex items-center justify-center">
-        <%- I('zap', 'w-4 h-4') %>
-      </span>
-      <%= G.siteName %>
-    </a>
-
-    <nav class="flex items-center gap-5 text-sm font-medium">
-      <a href="/" class="text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
-        <%= tr('home') %>
-      </a>
-      <a href="/products" class="text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
-        <%= tr('products') %>
-      </a>
-      <a href="/dashboard" class="text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<header class="bg-[#fcfbf7]/90 dark:bg-[#121615]/90 backdrop-blur sticky top-0 z-50 border-b border-[#ece7df] dark:border-[#222b27] transition-colors">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    
+    <!-- Left Navigation -->
+    <nav class="hidden md:flex items-center gap-7 text-xs font-semibold tracking-wide text-[#4f5c56] dark:text-[#a2b5ac]">
+      <a href="/products" class="hover:text-[#1f3d35] dark:hover:text-white transition-colors"><%= tr('shop') %></a>
+      <a href="/products?category=cookware" class="hover:text-[#1f3d35] dark:hover:text-white transition-colors"><%= tr('bestsellers') %></a>
+      <a href="/#gallery" class="hover:text-[#1f3d35] dark:hover:text-white transition-colors"><%= tr('gallery') %></a>
+      <a href="/about" class="hover:text-[#1f3d35] dark:hover:text-white transition-colors"><%= tr('about') %></a>
+      <a href="/dashboard" class="text-[#2c6153] dark:text-[#52aa95] hover:underline flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#2c6153] dark:bg-[#52aa95]"></span>
         <%= tr('dashboard') %>
       </a>
-      <a href="/about" class="text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
-        <%= tr('about') %>
-      </a>
-      <a href="/api/health" target="_blank" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
-        API
+    </nav>
+
+    <!-- Center Brand Logo -->
+    <a href="/" class="text-2xl font-bold tracking-tight text-[#1a2e28] dark:text-[#f0f5f2] flex items-center">
+      <span class="font-serif-title font-bold tracking-normal text-[26px]">Home</span><span class="font-serif-italic font-normal text-[26px] text-[#2c6153] dark:text-[#64bfa9]">dine</span>
+    </a>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-3">
+      <!-- Search Pill -->
+      <form method="GET" action="/products" class="relative hidden sm:block">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7c8d86]">
+          <%- I('search', 'w-3.5 h-3.5') %>
+        </div>
+        <input type="text" name="search" placeholder="<%= tr('search_placeholder') %>"
+          class="pl-9 pr-4 py-2 text-xs rounded-full bg-[#f1ece1] dark:bg-[#1d2522] border-none text-[#23352f] dark:text-[#e4ebe7] placeholder-[#8c9c95] focus:outline-none focus:ring-1 focus:ring-[#2c6153] w-44 md:w-56 transition-all" />
+      </form>
+
+      <!-- Cart Icon -->
+      <a href="/products" class="p-2.5 rounded-full bg-[#f1ece1] dark:bg-[#1d2522] text-[#23352f] dark:text-[#e4ebe7] hover:bg-[#e4ddcf] dark:hover:bg-[#283530] transition-colors relative" title="Cart">
+        <%- I('shopping-bag', 'w-4 h-4') %>
+        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#d98236]"></span>
       </a>
 
-      <!-- i18n switcher -->
-      <div class="flex items-center bg-slate-100 dark:bg-slate-700/60 p-0.5 rounded-lg text-xs font-semibold">
-        <a href="?lang=en" class="px-2 py-1 rounded <%= (typeof R !== 'undefined' && R && R.locale === 'en') || (!R || !R.locale) ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400' %>">EN</a>
-        <a href="?lang=fr" class="px-2 py-1 rounded <%= typeof R !== 'undefined' && R && R.locale === 'fr' ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400' %>">FR</a>
+      <!-- User / Login -->
+      <a href="/login" class="p-2.5 rounded-full bg-[#f1ece1] dark:bg-[#1d2522] text-[#23352f] dark:text-[#e4ebe7] hover:bg-[#e4ddcf] dark:hover:bg-[#283530] transition-colors" title="Account">
+        <%- I('user', 'w-4 h-4') %>
+      </a>
+
+      <!-- Language Switcher -->
+      <div class="flex items-center bg-[#f1ece1] dark:bg-[#1d2522] p-1 rounded-full text-[11px] font-bold">
+        <a href="?lang=en" class="px-2 py-0.5 rounded-full <%= (typeof R !== 'undefined' && R && R.locale === 'en') || (!R || !R.locale) ? 'bg-[#1f3d35] text-white' : 'text-[#6e8078] hover:text-[#1f3d35] dark:text-[#8ea39b]' %>">EN</a>
+        <a href="?lang=fr" class="px-2 py-0.5 rounded-full <%= typeof R !== 'undefined' && R && R.locale === 'fr' ? 'bg-[#1f3d35] text-white' : 'text-[#6e8078] hover:text-[#1f3d35] dark:text-[#8ea39b]' %>">FR</a>
       </div>
 
-      <!-- Auth Link -->
-      <a href="/login" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-sm">
-        <%= tr('login') %>
-      </a>
-
       <!-- Theme Switcher -->
-      <button onclick="__nxpress__.theme.toggle()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors" title="Toggle Theme">
+      <button onclick="__nxpress__.theme.toggle()" class="p-2 rounded-full text-[#4f5c56] dark:text-[#a2b5ac] hover:bg-[#f1ece1] dark:hover:bg-[#1d2522] transition-colors" title="Toggle Theme">
         <%- I('moon', 'w-4 h-4 dark:hidden') %>
         <%- I('sun', 'w-4 h-4 hidden dark:block') %>
       </button>
-    </nav>
+    </div>
+
   </div>
 </header>

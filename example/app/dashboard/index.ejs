@@ -1,23 +1,23 @@
 <div class="space-y-8">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-[#ece7df] dark:border-[#222b27]">
     <div>
       <div class="flex items-center gap-2 mb-1">
-        <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800/60">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#2c6153]/10 text-[#2c6153] dark:bg-[#52aa95]/20 dark:text-[#64bfa9] border border-[#2c6153]/20">
           Protected Area
         </span>
-        <span class="text-xs text-slate-400">Cascading Middleware Active</span>
+        <span class="text-xs text-[#7a8c84]">Cascading Middleware Active</span>
       </div>
-      <h1 class="text-2xl font-black text-slate-900 dark:text-white">
-        <%= tr('dashboard') %>
+      <h1 class="text-2xl sm:text-3xl font-bold text-[#1a2e28] dark:text-white">
+        Homedine <span class="font-serif-italic font-normal text-[#2c6153] dark:text-[#64bfa9]"><%= tr('dashboard') %></span>
       </h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        <%= tr('dashboard_welcome') %> Connecté en tant que <strong class="text-sky-600 dark:text-sky-400"><%= user.name %></strong> (<%= user.email %>).
+      <p class="text-xs sm:text-sm text-[#667a71] dark:text-[#8ea399] mt-1">
+        <%= tr('dashboard_welcome') %> Connecté en tant que <strong class="text-[#1a2e28] dark:text-white"><%= user.name %></strong> (<%= user.email %>).
       </p>
     </div>
 
     <div class="flex items-center gap-3">
-      <button onclick="document.cookie='nxpress_user=; Max-Age=0; path=/'; window.location.href='/login';" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 transition-colors">
+      <button onclick="document.cookie='nxpress_user=; Max-Age=0; path=/'; window.location.href='/login';" class="px-4 py-2 rounded-full text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 transition-colors">
         <%= tr('logout') %>
       </button>
     </div>
@@ -25,40 +25,40 @@
 
   <!-- Quick Stats Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60">
-      <div class="text-xs font-semibold text-slate-400 mb-1">Total Products</div>
-      <div class="text-2xl font-black text-slate-900 dark:text-white"><%= stats.totalProducts %></div>
-      <div class="text-xs text-emerald-500 mt-1">Live in store</div>
+    <div class="bg-white dark:bg-[#18201d] rounded-2xl p-5 border border-[#eee8dc] dark:border-[#26332d]">
+      <div class="text-xs font-semibold text-[#7a8c84] mb-1">Total Products</div>
+      <div class="text-2xl font-bold text-[#1a2e28] dark:text-white"><%= stats.totalProducts %></div>
+      <div class="text-[11px] text-[#2c6153] dark:text-[#64bfa9] mt-1">Live in store</div>
     </div>
-    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60">
-      <div class="text-xs font-semibold text-slate-400 mb-1">Stock Units</div>
-      <div class="text-2xl font-black text-slate-900 dark:text-white"><%= stats.totalStock %></div>
-      <div class="text-xs text-sky-500 mt-1">Across all categories</div>
+    <div class="bg-white dark:bg-[#18201d] rounded-2xl p-5 border border-[#eee8dc] dark:border-[#26332d]">
+      <div class="text-xs font-semibold text-[#7a8c84] mb-1">Total Stock</div>
+      <div class="text-2xl font-bold text-[#1a2e28] dark:text-white"><%= stats.totalStock %></div>
+      <div class="text-[11px] text-[#667a71] mt-1">Units available</div>
     </div>
-    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60">
-      <div class="text-xs font-semibold text-slate-400 mb-1">Inventory Value</div>
-      <div class="text-2xl font-black text-slate-900 dark:text-white"><%= stats.totalRevenue %> <%= G.currency %></div>
-      <div class="text-xs text-purple-500 mt-1">Estimated value</div>
+    <div class="bg-white dark:bg-[#18201d] rounded-2xl p-5 border border-[#eee8dc] dark:border-[#26332d]">
+      <div class="text-xs font-semibold text-[#7a8c84] mb-1">Inventory Value</div>
+      <div class="text-2xl font-bold text-[#1a2e28] dark:text-white"><%= typeof G !== 'undefined' && G.currency ? G.currency : '$' %><%= stats.totalRevenue.toFixed ? stats.totalRevenue.toFixed(2) : stats.totalRevenue %></div>
+      <div class="text-[11px] text-[#d98236] mt-1">Retail value</div>
     </div>
-    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60">
-      <div class="text-xs font-semibold text-slate-400 mb-1">Server Memory</div>
-      <div class="text-2xl font-black text-slate-900 dark:text-white"><%= systemInfo.memory %></div>
-      <div class="text-xs text-amber-500 mt-1">Node <%= systemInfo.nodeVersion %></div>
+    <div class="bg-white dark:bg-[#18201d] rounded-2xl p-5 border border-[#eee8dc] dark:border-[#26332d]">
+      <div class="text-xs font-semibold text-[#7a8c84] mb-1">Server Memory</div>
+      <div class="text-2xl font-bold text-[#1a2e28] dark:text-white"><%= systemInfo.memory %></div>
+      <div class="text-[11px] text-[#7a8c84] mt-1">Node <%= systemInfo.nodeVersion %></div>
     </div>
   </div>
 
-  <!-- Products Management Table -->
-  <div class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 overflow-hidden shadow-sm">
-    <div class="p-5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-      <h2 class="text-base font-bold text-slate-900 dark:text-white">Product Inventory Management</h2>
-      <a href="/products" class="text-xs font-semibold text-sky-500 hover:text-sky-600">View Public Catalog &rarr;</a>
+  <!-- Products Inventory Table -->
+  <div class="bg-white dark:bg-[#18201d] rounded-2xl border border-[#eee8dc] dark:border-[#26332d] overflow-hidden shadow-sm">
+    <div class="p-5 border-b border-[#eee8dc] dark:border-[#26332d] flex items-center justify-between">
+      <h2 class="text-sm font-bold text-[#1a2e28] dark:text-white">Product Inventory Management</h2>
+      <a href="/products" class="text-xs font-semibold text-[#2c6153] dark:text-[#64bfa9] hover:underline">View Public Store &rarr;</a>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs">
-        <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700/50">
+        <thead class="bg-[#faf8f4] dark:bg-[#151c19] text-[#7a8c84] border-b border-[#eee8dc] dark:border-[#26332d]">
           <tr>
             <th class="py-3 px-4 font-semibold">ID</th>
-            <th class="py-3 px-4 font-semibold">Name</th>
+            <th class="py-3 px-4 font-semibold">Product</th>
             <th class="py-3 px-4 font-semibold">Category</th>
             <th class="py-3 px-4 font-semibold">Price</th>
             <th class="py-3 px-4 font-semibold">Stock</th>
@@ -66,19 +66,22 @@
             <th class="py-3 px-4 font-semibold text-right">Action</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40">
+        <tbody class="divide-y divide-[#eee8dc] dark:divide-[#26332d]">
           <% products.forEach(function(item) { %>
-            <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30 transition-colors">
-              <td class="py-3 px-4 font-mono text-slate-400">#<%= item.id %></td>
-              <td class="py-3 px-4 font-bold text-slate-900 dark:text-white"><%= item.name %></td>
+            <tr class="hover:bg-[#faf8f4]/60 dark:hover:bg-[#1f2a25]/40 transition-colors">
+              <td class="py-3 px-4 font-mono text-[#8c9e96]">#<%= item.id %></td>
+              <td class="py-3 px-4 font-bold text-[#1a2e28] dark:text-white flex items-center gap-2">
+                <img src="<%= item.image %>" alt="" class="w-7 h-7 rounded-lg object-cover" />
+                <span><%= item.name %></span>
+              </td>
               <td class="py-3 px-4">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#f1ece1] dark:bg-[#202b26] text-[#44544e] dark:text-[#b0c2b9]">
                   <%= item.category %>
                 </span>
               </td>
-              <td class="py-3 px-4 font-bold"><%= item.price %> <%= G.currency %></td>
+              <td class="py-3 px-4 font-bold"><%= typeof G !== 'undefined' && G.currency ? G.currency : '$' %><%= item.price.toFixed ? item.price.toFixed(2) : item.price %></td>
               <td class="py-3 px-4">
-                <span class="font-medium <%= item.stock < 10 ? 'text-amber-500 font-bold' : 'text-slate-600 dark:text-slate-300' %>">
+                <span class="font-medium <%= item.stock < 15 ? 'text-[#d98236] font-bold' : 'text-[#44544e] dark:text-[#b0c2b9]' %>">
                   <%= item.stock %> units
                 </span>
               </td>
@@ -89,7 +92,7 @@
                 </div>
               </td>
               <td class="py-3 px-4 text-right">
-                <a href="/products/<%= item.id %>" class="text-sky-500 hover:text-sky-600 font-semibold">View</a>
+                <a href="/products/<%= item.id %>" class="text-[#2c6153] dark:text-[#64bfa9] hover:underline font-semibold">View</a>
               </td>
             </tr>
           <% }); %>
