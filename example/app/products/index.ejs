@@ -1,0 +1,47 @@
+<div class="space-y-8">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900 dark:text-white">
+        <%= tr('products') %>
+      </h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        <%= totalCount %> <%= tr('units_available') %>
+      </p>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <form method="GET" action="/products" class="flex flex-wrap items-center gap-3">
+      <input type="text" name="search" value="<%= searchQuery %>" placeholder="<%= tr('search_placeholder') %>"
+        class="px-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 w-64 shadow-sm" />
+
+      <select name="category" onchange="this.form.submit()"
+        class="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-sky-500 shadow-sm cursor-pointer">
+        <option value="" <%= selectedCategory === 'all' ? 'selected' : '' %>><%= tr('all_categories') %></option>
+        <% categories.forEach(function(cat) { %>
+          <option value="<%= cat %>" <%= selectedCategory.toLowerCase() === cat.toLowerCase() ? 'selected' : '' %>><%= cat %></option>
+        <% }); %>
+      </select>
+
+      <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-sm">
+        Filter
+      </button>
+    </form>
+  </div>
+
+  <!-- Products Grid -->
+  <% if (products.length === 0) { %>
+    <div class="text-center py-16 bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-800">
+      <div class="text-4xl mb-3">🔍</div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">No products found</h3>
+      <p class="text-xs text-slate-400 mt-1">Try refining your search terms or category filter.</p>
+      <a href="/products" class="inline-block mt-4 text-xs font-bold text-sky-500 hover:underline">Reset Filters</a>
+    </div>
+  <% } else { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% products.forEach(function(product) { %>
+        <%- $('ProductCard', { product: product }) %>
+      <% }); %>
+    </div>
+  <% } %>
+</div>

@@ -1,0 +1,36 @@
+<div class="space-y-12 max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="text-center space-y-3 pb-8 border-b border-slate-200 dark:border-slate-800">
+    <div class="inline-flex p-3 rounded-2xl bg-sky-500/10 text-sky-500 text-xl font-bold">
+      ⚡
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
+      À Propos de <span class="text-sky-500">Nxpress</span>
+    </h1>
+    <p class="text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
+      Le framework Node.js qui apporte le routage Next.js-like et le SSR moderne directement à Express.js.
+    </p>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% features.forEach(function(feat) { %>
+      <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/60 shadow-sm space-y-3">
+        <div class="text-2xl"><%= feat.icon %></div>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white"><%= feat.title %></h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><%= feat.desc %></p>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Documentation Link Banner -->
+  <div class="p-8 rounded-3xl bg-sky-500 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl shadow-sky-500/20">
+    <div class="space-y-1 text-center sm:text-left">
+      <h3 class="text-xl font-black">Prêt à explorer la documentation ?</h3>
+      <p class="text-xs text-sky-100">Consultez tous les guides de démarrage, API et exemples.</p>
+    </div>
+    <a href="https://nxpress.derson.dev" target="_blank" class="px-6 py-3 rounded-xl text-xs font-bold bg-white text-sky-600 hover:bg-sky-50 transition-colors shrink-0 shadow-md">
+      Ouvrir la Documentation &rarr;
+    </a>
+  </div>
+</div>

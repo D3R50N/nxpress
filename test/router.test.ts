@@ -20,8 +20,8 @@ assert.strictEqual(fileToRoutePath('admin/(dashboard)/analytics/[id].ejs'), '/ad
 assert.strictEqual(fileToRoutePath('(marketing)/(public)/about.njk'), '/about');
 
 console.log('Testing findLayoutsForRoute...');
-const exampleEjsDir = path.resolve('./example/ejs/app');
-const layouts = findLayoutsForRoute(path.resolve('./example/ejs'), exampleEjsDir, 'index.ejs', 'ejs');
+const exampleEjsDir = path.resolve('./example/app');
+const layouts = findLayoutsForRoute(path.resolve('./example'), exampleEjsDir, 'index.ejs', 'ejs');
 assert.strictEqual(layouts.length > 0, true);
 
 console.log('Testing builtinHelpers...');
@@ -58,7 +58,7 @@ const doubleInjected = injectMetadata(injectedHtml, metaHtml);
 assert.strictEqual(doubleInjected, injectedHtml);
 
 console.log('Testing case-insensitive renderComponent...');
-const exampleComponentsDir = path.resolve('./example/ejs/components');
+const exampleComponentsDir = path.resolve('./example/components');
 registerComponents(exampleComponentsDir);
 const compUpper = renderComponent('ProductCard', { G: { currency: '€' }, product: { name: 'Test', price: 100, category: 'Cat', description: 'Desc', id: 1 } });
 const compLower = renderComponent('productcard', { G: { currency: '€' }, product: { name: 'Test', price: 100, category: 'Cat', description: 'Desc', id: 1 } });
@@ -116,9 +116,9 @@ async function testExecuteMw() {
 
   // 5. Test exportStatic (SSG)
   const { exportStatic } = await import('../src/export');
-  const outDir = path.resolve('./example/ejs/out');
+  const outDir = path.resolve('./example/out');
   const exportRes = await exportStatic({
-    rootDir: path.resolve('./example/ejs'),
+    rootDir: path.resolve('./example'),
     outDir,
     tailwind: false,
   });

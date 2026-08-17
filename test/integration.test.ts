@@ -5,7 +5,7 @@ import { serve } from "../src/server";
 
 const PORT_EJS = 4568;
 
-const ejsDir = path.join(__dirname, "../example/ejs");
+const ejsDir = path.join(__dirname, "../example");
 
 const ejsServer = serve({
   port: PORT_EJS,

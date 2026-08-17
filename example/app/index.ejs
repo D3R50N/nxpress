@@ -1,0 +1,73 @@
+<div class="space-y-12">
+  <!-- Hero Section -->
+  <section class="text-center max-w-2xl mx-auto pt-6 pb-2">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/50 mb-6">
+      <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+      Framework Showcase Demo
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+      Next-Gen SSR with <span class="text-sky-500">Nxpress</span>
+    </h1>
+    <p class="text-slate-600 dark:text-slate-300 text-base leading-relaxed mb-8">
+      <%= tr('welcome') %>. Découvrez le routage basé sur les fichiers, les middlewares en cascade, les routes d'API type-safe et l'internationalisation intégrée.
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a href="/products" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-md shadow-sky-500/20">
+        <%= tr('products') %> (<%= totalProducts %>) &rarr;
+      </a>
+      <a href="/dashboard" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 transition-colors">
+        <%= tr('dashboard') %>
+      </a>
+      <a href="/api/health" target="_blank" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+        API Status ↗
+      </a>
+    </div>
+  </section>
+
+  <!-- Features Highlight -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg mb-4">📁</div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">File-Based Routing</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Pages SSR et endpoints API créés automatiquement à partir de votre arborescence <code>app/</code>.
+      </p>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Cascading Middleware</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Middlewares hérités hiérarchiquement par dossier pour protéger facilement vos sections comme <code>/dashboard</code>.
+      </p>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg mb-4">🌍</div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2">Built-in i18n & Theme</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Support multilingue instantané avec <code>tr()</code> et gestion de thème sombre/clair sans configuration.
+      </p>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white"><%= tr('featured_products') %></h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sélection de nos meilleurs équipements</p>
+      </div>
+      <a href="/products" class="text-xs font-bold text-sky-500 hover:text-sky-600 transition-colors">
+        <%= tr('products') %> &rarr;
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% featured.forEach(function(product) { %>
+        <%- $('ProductCard', { product: product }) %>
+      <% }); %>
+    </div>
+  </section>
+</div>

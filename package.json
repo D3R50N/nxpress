@@ -30,8 +30,8 @@
     "prestart": "node -e \"require('fs').cpSync('src/injections', 'dist/injections', { recursive: true })\"",
     "prepublishOnly": "pnpm build",
     "dev": "tsc --watch",
-    "example": "tsx example/ejs/server.ts",
-    "example:dev": "nodemon --delay 1 --watch example/ejs --ext ts,ejs,html,js --exec tsx example/ejs/server.ts",
+    "example": "tsx example/server.ts",
+    "example:dev": "nodemon --delay 1 --watch example --ext ts,ejs,html,js --exec tsx example/server.ts",
     "test": "tsx test/router.test.ts && tsx test/integration.test.ts"
   },
   "keywords": [

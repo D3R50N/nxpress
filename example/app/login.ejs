@@ -1,0 +1,79 @@
+<div class="max-w-md mx-auto my-10">
+  <div class="bg-white dark:bg-slate-800/90 rounded-3xl p-8 border border-slate-200/80 dark:border-slate-700/60 shadow-xl">
+    <div class="text-center mb-8">
+      <div class="inline-flex p-3 rounded-2xl bg-sky-500/10 text-sky-500 mb-3">
+        ⚡
+      </div>
+      <h1 class="text-2xl font-black text-slate-900 dark:text-white">
+        <%= tr('login') %>
+      </h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+        <%= tr('login_description') %>
+      </p>
+    </div>
+
+    <% if (hasError) { %>
+      <div class="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/50 text-rose-600 dark:text-rose-400 text-xs">
+        <strong>Accès restreint :</strong> Veuillez vous connecter pour accéder à cette page.
+      </div>
+    <% } %>
+
+    <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+        <input type="email" id="email" value="admin@nxpress.dev" required
+          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-sky-500" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+        <input type="password" id="password" value="password123" required
+          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-sky-500" />
+      </div>
+
+      <button type="submit" id="submitBtn"
+        class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white transition-colors shadow-md shadow-sky-500/20">
+        Se connecter &rarr;
+      </button>
+    </form>
+
+    <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/60 text-center text-xs text-slate-400">
+      Compte de test : <code>admin@nxpress.dev</code> / <code>user@nxpress.dev</code>
+    </div>
+  </div>
+</div>
+
+<script>
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerText = 'Connexion en cours...';
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      // Set session cookie
+      document.cookie = 'nxpress_user=' + encodeURIComponent(JSON.stringify(data.user)) + '; path=/; max-age=86400';
+      window.location.href = '<%= redirectUrl %>';
+    } else {
+      alert(data.error || 'Erreur de connexion');
+      btn.disabled = false;
+      btn.innerText = 'Se connecter →';
+    }
+  } catch (err) {
+    alert('Erreur réseau');
+    btn.disabled = false;
+    btn.innerText = 'Se connecter →';
+  }
+}
+</script>
