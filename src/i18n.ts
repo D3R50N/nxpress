@@ -12,6 +12,21 @@ export interface I18nConfig {
   translations?: Record<string, Record<string, any>>;
 }
 
+const activeI18nReloaders = new Set<() => void>();
+
+/**
+ * Triggers a reload of translations across all registered i18n middleware instances.
+ */
+export function reloadAllTranslations(): void {
+  for (const reloadFn of activeI18nReloaders) {
+    try {
+      reloadFn();
+    } catch (err) {
+      logger.warn("Failed reloading translations:", err);
+    }
+  }
+}
+
 /**
  * Loads translations dictionary for all configured locales.
  */
@@ -53,6 +68,11 @@ export function loadTranslations(
     for (const file of candidates) {
       if (fs.existsSync(file)) {
         try {
+          try {
+            delete require.cache[file];
+            delete require.cache[require.resolve(file)];
+          } catch (_e) {}
+
           if (file.endsWith(".json")) {
             const raw = fs.readFileSync(file, "utf8");
             translations[loc] = JSON.parse(raw);
@@ -235,11 +255,14 @@ export function createI18nMiddleware(
 ): RequestHandler {
   let translations = loadTranslations(rootDir, config);
 
-  (config as any)._reloadTranslations = () => {
+  const reload = () => {
     translations = loadTranslations(rootDir, config);
     return translations;
   };
+
+  (config as any)._reloadTranslations = reload;
   (config as any)._getTranslations = () => translations;
+  activeI18nReloaders.add(reload);
 
   return (req: Request, res: Response, next: NextFunction) => {
     const { locale, pathname, isPrefixed, hasQueryLocale } = detectLocale(

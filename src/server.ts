@@ -21,7 +21,7 @@ import {
   LIVE_RELOAD_SCRIPT,
 } from "./liveReload";
 import { getFilteredEnv, isDevMode } from "./env";
-import { I18nConfig, createI18nMiddleware } from "./i18n";
+import { I18nConfig, createI18nMiddleware, reloadAllTranslations } from "./i18n";
 
 export type TemplateEngine = "ejs" | "hbs" | "html" | "nunjucks" | "liquid";
 
@@ -135,6 +135,8 @@ export function nxpress(options: NxpressServerOptions = {}): Express {
       };
       options.i18n = i18nConfig;
     }
+  } else if (i18nConfig) {
+    options.i18n = i18nConfig;
   }
 
   if (i18nConfig && Array.isArray(i18nConfig.locales) && i18nConfig.locales.length > 0) {
@@ -298,8 +300,10 @@ function setupDevWatcher(
   const watcher = chokidar.watch(watchTargets, {
     ignored: [tailwindOutput, "**/*.map"],
     ignoreInitial: true,
+    atomic: true,
     awaitWriteFinish: {
-      stabilityThreshold: 30,
+      stabilityThreshold: 50,
+      pollInterval: 20,
     },
   });
 
@@ -333,6 +337,7 @@ function setupDevWatcher(
       const updatedConfig = loadConfigFile(rootDir);
       options.globals = updatedConfig.globals || {};
       options.i18n = updatedConfig.i18n || options.i18n;
+      reloadAllTranslations();
       if (options.i18n && typeof (options.i18n as any)._reloadTranslations === "function") {
         (options.i18n as any)._reloadTranslations();
       }
@@ -342,7 +347,16 @@ function setupDevWatcher(
       return;
     }
 
-    if (filePath.startsWith(localesDir)) {
+    const resolvedPath = path.resolve(filePath);
+    const resolvedLocalesDir = path.resolve(localesDir);
+    const isLocaleFile =
+      resolvedPath.startsWith(resolvedLocalesDir) ||
+      relPath.startsWith("locales") ||
+      relPath.includes("/locales/") ||
+      relPath.includes("\\locales\\");
+
+    if (isLocaleFile) {
+      reloadAllTranslations();
       const activeI18n = options.i18n || fileConfig.i18n;
       if (activeI18n && typeof (activeI18n as any)._reloadTranslations === "function") {
         (activeI18n as any)._reloadTranslations();
